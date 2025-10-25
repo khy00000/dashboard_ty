@@ -25,32 +25,8 @@ export interface ContainerData {
   sog: number;
 }
 
-// 구글맵
-export interface MapConfig {
-  center: google.maps.LatLngLiteral;
-  zoom: number;
-  mapTypeId: string;
-}
-
-// 폴리라인 확장
-export interface ShipPolyline extends google.maps.Polyline {
-  mmsi?: string;
-  shipName?: string;
-}
-
-// API 응답
-export interface APIResponse {
-  page: number;
-  perPage: number;
-  totalCount: number;
-  currentCount: number;
-  matchCount: number;
-  data: AISDataPoint[];
-}
-
 // Props
 export interface GoogleMapProps {
-  googleMapsKey: string;
   shipData: Ship[];
   onShipSelect: (ship: Ship) => void;
   selectShip: Ship | null;
@@ -63,10 +39,4 @@ export interface ShipInfoCardProps {
 
 export interface ChartProps {
   data: ContainerData[];
-}
-
-export interface ApiKeyFormProps {
-  onSubmit : (apiKey: string, googleMapsKey: string) => void;
-  loading: boolean;
-  error: string;
 }
