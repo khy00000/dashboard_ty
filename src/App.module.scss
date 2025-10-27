@@ -1,4 +1,13 @@
-// 공통 유틸
+* {
+  color: #ffffff;
+  font-family: system-ui, "-apple-system", "sans-serif";
+}
+
+html {
+  background: #0a0e27;
+}
+
+// 공통
 .blind {
   position: absolute;
   width: 1px;
@@ -8,100 +17,170 @@
   clip: rect(0, 0, 0, 0);
 }
 
-// 메인 앱
 .app {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #0a0e27;
+  width: 100vw;
   min-height: 100vh;
-  padding: 16px;
-  
-  @media (min-width: 768px) {
-    padding: 24px;
+  padding: 0;
+
+  @media (min-width: 1024px) {
+    display: flex;
   }
 }
 
-.container {
-  max-width: 1400px;
-  margin: 0 auto;
+// 사이드바 (PC만)
+.sidebar {
+  display: none;
+
+  @media (min-width: 1024px) {
+    display: flex;
+    flex-direction: column;
+    width: 80px;
+    background: #0d1128;
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 24px 0;
+    align-items: center;
+    gap: 32px;
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    cursor: pointer;
+    transition: transform 0.3s;
+
+    &:hover {
+      transform: scale(1.1);
+    }
+  }
+
+  .navIcon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: all 0.3s;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: #00ff88;
+    }
+
+    &.active {
+      background: rgba(0, 255, 136, 0.1);
+      color: #00ff88;
+    }
+  }
 }
 
-// 헤더 섹션
+// 메인 컨테이너
+.container {
+  flex: 1;
+  max-width: 100%;
+  padding: 10px;
+
+  @media (min-width: 1024px) {
+    margin-left: 80px;
+    max-width: calc(100% - 80px);
+  }
+}
+
+// 헤더
 .header {
-  padding-top: 1rem;
-  margin-bottom: 24px;
-  
-  > div {
+  margin-bottom: 32px;
+
+  > div:first-child {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    margin-bottom: 24px;
     flex-wrap: wrap;
     gap: 16px;
-    margin-bottom: 20px;
   }
 }
 
 .title {
-  font-size: 1.5rem !important;
-  font-weight: 600 !important;
   color: white;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-  
+  font-size: 1.25rem !important;
+  font-weight: 600 !important;
+  margin: 0 !important;
+
+  @media (min-width: 768px) {
+    font-size: 1.75rem !important;
+  }
+
   span {
     display: block;
-    
+
     &:first-child {
-      font-size: 2rem;
+      font-size: 1.5rem;
       font-weight: 700;
-      letter-spacing: -0.5px;
-      
+      background: linear-gradient(90deg, #00ff88 0%, #00d4ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+
       @media (min-width: 768px) {
-        font-size: 2.5rem;
+        font-size: 2rem;
       }
     }
-    
+
     &:last-child {
-      font-size: 0.875rem;
-      font-weight: 400;
-      opacity: 0.9;
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.5);
       margin-top: 4px;
-      
+      font-weight: 400;
+
       @media (min-width: 768px) {
-        font-size: 1rem;
+        font-size: 0.875rem;
       }
     }
   }
 }
 
 .refresh {
-  min-width: 48px !important;
-  height: 48px;
+  min-width: 44px !important;
+  height: 44px;
   padding: 0 !important;
-  border-radius: 12px !important;
-  background: rgba(255, 255, 255, 0.95) !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transition: all 0.3s ease;
-  
+  border-radius: 10px !important;
+  background: rgba(0, 255, 136, 0.1) !important;
+  border: 1px solid rgba(0, 255, 136, 0.3) !important;
+  color: #00ff88 !important;
+  transition: all 0.3s;
+
   &:hover {
-    background: white !important;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    background: rgba(0, 255, 136, 0.2) !important;
+    border-color: #00ff88 !important;
+    transform: rotate(180deg);
   }
-  
+
   &:disabled {
-    opacity: 0.6;
+    opacity: 0.3;
     transform: none;
-  }
-  
-  span {
-    margin: 0 !important;
   }
 }
 
-// 통계 카드
+// 통계 카드 그리드
 .stats {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 12px;
-  
+
   @media (min-width: 768px) {
     grid-template-columns: repeat(4, 1fr);
     gap: 16px;
@@ -109,38 +188,115 @@
 }
 
 .statCard {
-  background: rgba(255, 255, 255, 0.95);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.03) 0%,
+    rgba(255, 255, 255, 0.01) 100%
+  );
   backdrop-filter: blur(10px);
-  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 20px;
   border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-  
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+
   @media (min-width: 768px) {
-    padding: 20px;
+    padding: 24px;
   }
-  
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #00ff88 0%, #00d4ff 100%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
   &:hover {
     transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-  }
-  
-  h5 {
-    margin-top: 8px;
-    color: #114e8a;
-    font-size: 1.5rem;
-    
-    @media (min-width: 768px) {
-      font-size: 1.75rem;
+    border-color: rgba(0, 255, 136, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 255, 136, 0.1);
+
+    &::before {
+      opacity: 1;
     }
+  }
+
+  .statLabel {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  h5 {
+    margin: 0;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 700;
+
+    @media (min-width: 768px) {
+      font-size: 2rem;
+    }
+  }
+
+  .statChange {
+    font-size: 0.75rem;
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    &.positive {
+      color: #00ff88;
+    }
+
+    &.negative {
+      color: #ff4757;
+    }
+  }
+}
+
+// 라이브 상태
+.liveStatus {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  &::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #00ff88;
+    box-shadow: 0 0 12px #00ff88;
+    animation: pulse 2s infinite;
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.2);
   }
 }
 
 // 알림
 .infoAlert {
   margin-top: 24px !important;
+  background: rgba(0, 212, 255, 0.1) !important;
+  border: 1px solid rgba(0, 212, 255, 0.3) !important;
   border-radius: 12px !important;
-  background: rgba(255, 255, 255, 0.95) !important;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  color: #00d4ff !important;
 }

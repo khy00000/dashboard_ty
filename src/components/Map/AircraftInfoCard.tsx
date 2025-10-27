@@ -2,31 +2,13 @@ import React from 'react';
 import { Card, CardContent, Typography, Button, Box, Chip } from '@mui/material';
 import type { AircraftInfoCardProps } from '../../types/aircraft.types';
 import { metersToFeet, msToKnots } from '../../utils/dataSky';
+import './GoogleMap.module.scss';
 
 const AircraftInfoCard: React.FC<AircraftInfoCardProps> = ({ aircraft, onClose }) => {
   return (
-    <Card
-      sx={{
-        position: 'absolute',
-        top: 16,
-        left: 16,
-        minWidth: 300,
-        maxWidth: 340,
-        zIndex: 1000,
-        boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
-        borderRadius: '16px',
-        background: 'rgba(255, 255, 255, 0.98)',
-        backdropFilter: 'blur(10px)',
-        '@media (max-width: 768px)': {
-          left: '50%',
-          transform: 'translateX(-50%)',
-          minWidth: 'calc(100% - 32px)',
-          maxWidth: 'calc(100% - 32px)',
-        }
-      }}
-    >
-      <CardContent sx={{ pb: '16px !important' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+    <Card className="aircraft-card">
+      <CardContent>
+        <Box className="aircraft-card__header">
           <Typography component="span" sx={{ fontSize: 28 }}>✈️</Typography>
           <Box sx={{ flex: 1 }}>
             <Typography variant="h6" color="primary" sx={{ fontWeight: 600, fontSize: '1.1rem' }}>
@@ -46,8 +28,8 @@ const AircraftInfoCard: React.FC<AircraftInfoCardProps> = ({ aircraft, onClose }
             />
           </Box>
         </Box>
-        
-        <Box sx={{ fontSize: 14, lineHeight: 1.8 }}>
+
+        <Box className="aircraft-card__info">
           <Typography variant="body2">
             <strong>ICAO24:</strong> {aircraft.id.toUpperCase()}
           </Typography>
@@ -74,14 +56,7 @@ const AircraftInfoCard: React.FC<AircraftInfoCardProps> = ({ aircraft, onClose }
           variant="outlined"
           onClick={onClose}
           fullWidth
-          sx={{ 
-            mt: 2,
-            transition: 'all 0.2s',
-            '&:hover': {
-              backgroundColor: 'primary.main',
-              color: 'white'
-            }
-          }}
+          className="aircraft-card__button"
         >
           선택 해제
         </Button>

@@ -1,13 +1,11 @@
 import React from 'react';
-import { Paper, Typography, Box } from '@mui/material';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import type{ ChartProps } from '../../types/aircraft.types';
+import type { ChartProps } from '../../types/aircraft.types';
 import styles from './Charts.module.scss';
 
 const HeadingChart: React.FC<ChartProps> = ({ data }) => {
   const avgHeading = (data.reduce((sum, d) => sum + d.heading, 0) / data.length).toFixed(0);
   
-  // 방향을 나침반 방향으로 변환
   const getDirection = (heading: number) => {
     const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
     const index = Math.round(heading / 45) % 8;
@@ -15,11 +13,9 @@ const HeadingChart: React.FC<ChartProps> = ({ data }) => {
   };
 
   return (
-    <Paper className={styles.chartContainer}>
-      <Typography variant="h6" gutterBottom>
-        🧭 비행 방향 (Heading)
-      </Typography>
-      
+    <div className={styles.chartContainer}>
+      <h2 className={styles.chartTitle}>🧭 비행 방향 (Heading)</h2>
+
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={data}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
@@ -30,11 +26,7 @@ const HeadingChart: React.FC<ChartProps> = ({ data }) => {
             domain={[0, 360]}
           />
           <Tooltip 
-            contentStyle={{ 
-              backgroundColor: 'white', 
-              border: '1px solid #ddd', 
-              borderRadius: '4px' 
-            }}
+            contentStyle={{ backgroundColor: 'white', border: '1px solid #ddd', borderRadius: '4px' }}
             labelStyle={{ fontWeight: 'bold' }}
             formatter={(value: number) => `${Math.round(value)}° (${getDirection(value)})`}
           />
@@ -51,12 +43,10 @@ const HeadingChart: React.FC<ChartProps> = ({ data }) => {
         </LineChart>
       </ResponsiveContainer>
 
-      <Box className={styles.stats} style={{ backgroundColor: '#fff3e0' }}>
-        <Typography variant="body2">
-          <strong>분석:</strong> 평균 방향 {avgHeading}° ({getDirection(parseFloat(avgHeading))})
-        </Typography>
-      </Box>
-    </Paper>
+      <div className={`${styles.stats} ${styles.orange}`}>
+        <p><strong>분석:</strong> 평균 방향 {avgHeading}° ({getDirection(parseFloat(avgHeading))})</p>
+      </div>
+    </div>
   );
 };
 
