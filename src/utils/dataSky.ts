@@ -7,7 +7,8 @@ const OPENSKY_API = "https://opensky-network.org/api/states/all";
 
 // 마지막 API 호출 시간 추적 (rate limiting)
 let lastCallTime = 0;
-const MIN_INTERVAL = 60000; // 1분
+let cachedAircraftData: Aircraft[] = [];
+const MIN_INTERVAL = 30000; // 30초
 
 // 실시간 항공기 데이터 가져오기 (한국 상공)
 export async function fetchAircraftData(): Promise<Aircraft[]> {
@@ -27,8 +28,8 @@ export async function fetchAircraftData(): Promise<Aircraft[]> {
           (MIN_INTERVAL - timeSinceLastCall) / 1000
         )}초 후 재시도`
       );
-      // 이전 데이터 유지 (빈 배열 대신)
-      return [];
+      // 이전 데이터 유지
+      return cachedAircraftData;
     }
 
     console.log("OpenSky Network API 호출...");
@@ -84,6 +85,8 @@ export async function fetchAircraftData(): Promise<Aircraft[]> {
 
     console.log(`${aircraft.length}대의 항공기 데이터 처리 완료`);
 
+    // 캐시 업데이트
+    cachedAircraftData = aircraft;
     return aircraft;
   } catch (error) {
     console.error("OpenSky API 오류:", error);

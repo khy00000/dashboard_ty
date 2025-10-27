@@ -68,8 +68,7 @@ const App: React.FC = () => {
 
   if (loading) {
     return (
-      <div className={styles.loadingScreen}>
-        <div className={styles.loadingSpinner}></div>
+      <div className={styles.loading}>
         <h2>실시간 항공기 데이터 로딩 중...</h2>
         <p>OpenSky Network에서 데이터를 가져오고 있습니다.</p>
       </div>
@@ -77,57 +76,56 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className={styles.app}>
-      {/* 사이드 네비 */}
-      <aside className={styles.sidebar}>
-        <div>
-          <h1 className={styles.logo}>
-            <CgAirplane />
-          </h1>
-
-          <nav className={styles.nav}>
-            <button>
-              <RiGlobalLine className={styles.icon} />
-            </button>
-            <button>
-              <LuMap className={styles.icon} />
-            </button>
-            <button>
-              <FaRegBookmark className={styles.icon} />
-            </button>
-            <button>
-              <FiSettings className={styles.icon} />
-            </button>
-          </nav>
+    <>
+      {aircraftData.length === 0 ? (
+        <div className={styles.loading}>
+          <h2>실시간 항공기 데이터 로딩 중...</h2>
+          <p>OpenSky Network에서 데이터를 가져오고 있습니다.</p>
         </div>
+      ) : (
+        <div className={styles.app}>
+          {/* 사이드 네비 */}
+          <aside className={styles.sidebar}>
+            <div>
+              <h1 className={styles.logo}>
+                <CgAirplane />
+              </h1>
 
-        <footer className={styles.sidebarFooter}>
-          <small>©</small>
-        </footer>
-      </aside>
+              <nav className={styles.nav}>
+                <button>
+                  <RiGlobalLine className={styles.icon} />
+                </button>
+                <button>
+                  <LuMap className={styles.icon} />
+                </button>
+                <button>
+                  <FaRegBookmark className={styles.icon} />
+                </button>
+                <button>
+                  <FiSettings className={styles.icon} />
+                </button>
+              </nav>
+            </div>
 
-      <main className={styles.main}>
-        {/* 헤더 */}
-        <header className={styles.header}>
-          <h2>Aircraft Tracking Dashboard</h2>
-          <button onClick={handleRefresh} disabled={refreshing}>
-            <IoMdRefresh className={styles.refresh} />
-          </button>
-        </header>
+            <footer className={styles.sidebarFooter}>
+              <small>©</small>
+            </footer>
+          </aside>
 
-        {/* 지도 차트 영역 */}
-        <div className={styles.sectionWrap}>
-          {/* 상단 */}
-          <div className={styles.sectionTop}>
+          <main className={styles.main}>
+            {/* 헤더 */}
+            <header className={styles.header}>
+              <h2>Aircraft Tracking Dashboard</h2>
+              <button onClick={handleRefresh} disabled={refreshing}>
+                <IoMdRefresh className={styles.refresh} />
+              </button>
+            </header>
 
-            {/* 지도 영역 */}
-            {aircraftData.length === 0 ? (
-              <div className={styles.alertWarning}>
-                현재 한국 상공(위도 30–45°, 경도 120–135°)에 추적 가능한
-                항공기가 없습니다. 잠시 후 다시 시도해주세요.
-              </div>
-            ) : (
-              <>
+            {/* 지도 차트 영역 */}
+            <div className={styles.sectionWrap}>
+              {/* 상단 */}
+              <div className={styles.sectionTop}>
+                {/* 지도 영역 */}
                 <section className={styles.mapSection}>
                   <GoogleMap
                     aircraftData={aircraftData}
@@ -135,64 +133,62 @@ const App: React.FC = () => {
                     selectedAircraft={selectedAircraft}
                   />
                 </section>
-              </>
-            )}
 
-            {/* 정보 영역 */}
-            <section className={styles.stats}>
-              <article className={styles.statCard}>
-                <p>추적 중인 항공기</p>
-                <strong>{aircraftData.length}대</strong>
-              </article>
-              <article className={styles.statCard}>
-                <p>평균 고도</p>
-                <strong>
-                  {metersToFeet(
-                    calculateAverageAltitude(aircraftData)
-                  ).toLocaleString()}{" "}
-                  ft
-                </strong>
-              </article>
-              <article className={styles.statCard}>
-                <p>평균 속도</p>
-                <strong>
-                  {msToKnots(calculateAverageSpeed(aircraftData))} knots
-                </strong>
-              </article>
-              <article className={styles.statCard}>
-                <p>상태</p>
-                <strong className={styles.live}>● LIVE</strong>
-              </article>
-            </section>
-          </div>
+                {/* 정보 영역 */}
+                <section className={styles.stats}>
+                  <article className={styles.statCard}>
+                    <p>추적 중인 항공기</p>
+                    <strong>{aircraftData.length}대</strong>
+                  </article>
+                  <article className={styles.statCard}>
+                    <p>평균 고도</p>
+                    <strong>
+                      {metersToFeet(
+                        calculateAverageAltitude(aircraftData)
+                      ).toLocaleString()}{" "}
+                      ft
+                    </strong>
+                  </article>
+                  <article className={styles.statCard}>
+                    <p>평균 속도</p>
+                    <strong>
+                      {msToKnots(calculateAverageSpeed(aircraftData))} knots
+                    </strong>
+                  </article>
+                  <article className={styles.statCard}>
+                    <p>상태</p>
+                    <strong className={styles.live}>● LIVE</strong>
+                  </article>
+                </section>
+              </div>
 
-          {/* 하단 차트 */}
-          {historyData.length > 0 ? (
-            <section className={styles.charts}>
-              <div className={styles.chartBox}>
-                <AltitudeChart data={historyData} />
-              </div>
-              <div className={styles.chartBox}>
-                <VelocityChart data={historyData} />
-              </div>
-              <div className={styles.chartBox}>
-                <HeadingChart data={historyData} />
-              </div>
-            </section>
-          ) : (
-            <div className={styles.alertInfo}>
-              💡 지도에서 항공기 마커를 클릭하여 해당 항공기의 비행 데이터를 확인하세요.
+              {/* 하단 차트 */}
+              {historyData.length > 0 ? (
+                <section className={styles.charts}>
+                  <div className={styles.chartWrap}>
+                    <AltitudeChart data={historyData} />
+                    <VelocityChart data={historyData} />
+                    <HeadingChart data={historyData} />
+                  </div>
+                </section>
+              ) : (
+                <div className={styles.alertInfo}>
+                  💡 지도에서 항공기 마커를 클릭하여 해당 항공기의 비행 데이터를
+                  확인하세요.
+                </div>
+              )}
+
+              <footer className={styles.footer}>
+                <p>
+                  데이터 제공: OpenSky Network | 30초마다 자동 갱신 | 한국
+                  상공(위도 30–45°, 경도 120–135°)
+                </p>
+              </footer>
             </div>
-          )}
-
-          <footer className={styles.footer}>
-            <p>
-              데이터 제공: OpenSky Network | 1분마다 자동 갱신 | 한국 상공(위도 30–45°, 경도 120–135°)
-            </p>
-          </footer>
+          </main>
         </div>
-      </main>
-    </div>
+      )}
+    </>
   );
 };
 

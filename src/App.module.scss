@@ -25,6 +25,26 @@ button {
   clip: rect(0, 0, 0, 0);
 }
 
+// 로딩 페이지
+.loading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.064) 0%,
+    rgba(255, 255, 255, 0.03) 100%
+  );
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  font-size: 20px;
+}
+
 .app {
   display: flex;
   background: #0a0e27;
@@ -58,7 +78,7 @@ button {
     align-items: center;
     justify-content: center;
     font-size: 30px;
-    margin-top: 30px;
+    margin-top: 17px;
     margin-bottom: 30px;
     cursor: pointer;
   }
@@ -167,7 +187,7 @@ button {
           overflow: hidden;
 
           &:hover {
-            transform: scale(1);
+            transform: scale(1.1);
             box-shadow: 0 8px 32px rgba(0, 89, 255, 0.1);
           }
 
@@ -187,10 +207,11 @@ button {
     .charts {
       height: 40%;
 
-      .chartBox{
+      .chartWrap {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 12px;
+        height: 100%;
       }
     }
 

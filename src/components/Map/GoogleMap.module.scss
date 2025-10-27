@@ -4,38 +4,73 @@
   overflow: hidden;
   position: relative;
   background: white;
+  width: 100%;
+  height: 100%;
+  min-height: 350px;
 }
 
 .map {
   width: 100%;
-  height: 400px;
-  
+  height: 100%;
+
   // 구글맵 불필요한 UI 숨기기
   :global {
-    
     .gm-svpc {
       display: none !important;
     }
-    
+
     // 풀스크린 버튼 숨기기
     .gm-fullscreen-control {
       display: none !important;
     }
-    
+
     // 지도 타입 컨트롤 숨기기
     .gm-style-mtc {
       display: none !important;
     }
-    
+
     // 확대/축소 컨트롤 스타일링
     .gm-bundled-control {
       margin: 16px !important;
-      
+
       button {
         background: rgba(255, 255, 255, 0.95) !important;
         border-radius: 8px !important;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
       }
+    }
+  }
+
+  .airInfo {
+    width: 230px;
+    height: 230px;
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    background: #0a0e27e1;
+    padding: 15px;
+
+    .airInfoHeader{
+      font-size: 16px;
+      margin-bottom: 15px;
+
+      .airInfoCountry{
+        font-size: 12px;
+      }
+    }
+
+    .airInfoBody{
+      font-size: 14px;
+
+      p{
+        margin-bottom: 5px;
+      }
+    }
+
+    .airInfoBtn{
+      position: absolute;
+      top: 10px;
+      right: 10px;
     }
   }
 }
