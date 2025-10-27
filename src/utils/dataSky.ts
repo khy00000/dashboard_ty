@@ -7,7 +7,7 @@ const OPENSKY_API = "https://opensky-network.org/api/states/all";
 
 // 마지막 API 호출 시간 추적 (rate limiting)
 let lastCallTime = 0;
-const MIN_INTERVAL = 60000; // 1분 (60초)
+const MIN_INTERVAL = 60000; // 1분
 
 // 실시간 항공기 데이터 가져오기 (한국 상공)
 export async function fetchAircraftData(): Promise<Aircraft[]> {
@@ -123,7 +123,7 @@ function generateMockAircraft(): Aircraft[] {
   return mockData;
 }
 
-// 항공기의 가상 이력 데이터 생성 (차트용 mock)
+// 가상 고도, 속도, 방향 데이터 생성 (차트용 mock)
 export function generateAircraftHistory(aircraft: Aircraft): AircraftHistory[] {
   const history: AircraftHistory[] = [];
   const currentTime = Date.now();

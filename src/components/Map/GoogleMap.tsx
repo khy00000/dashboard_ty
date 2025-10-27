@@ -138,30 +138,6 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
           onClose={handleCloseInfo}
         />
       )}
-
-      {/* 범례 */}
-      <aside className={styles.legend}>
-        <h4 className={styles.legendTitle}>범례</h4>
-
-        <ul className={styles.legendList}>
-          <li className={styles.legendItem}>
-            <svg width="16" height="16" viewBox="0 0 24 24">
-              <path
-                fill="#2196F3"
-                d="M21,16v-2l-8-5V3.5C13,2.67,12.33,2,11.5,2S10,2.67,10,3.5V9l-8,5v2l8-2.5V19l-2,1.5V22l3.5-1l3.5,1v-1.5L13,19v-5.5L21,16z"
-              />
-            </svg>
-            <span>항공기</span>
-          </li>
-
-          <li className={styles.legendItem}>
-            <span className={styles.legendLine}></span>
-            <span>비행 경로</span>
-          </li>
-        </ul>
-
-        <p className={styles.legendNote}>클릭하여 상세 정보 및 경로 확인</p>
-      </aside>
     </section>
   );
 };

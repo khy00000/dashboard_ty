@@ -13,10 +13,18 @@ import {
   msToKnots,
 } from "./utils/dataSky";
 import styles from "./App.module.scss";
+import { CgAirplane } from "react-icons/cg";
+import { RiGlobalLine } from "react-icons/ri";
+import { LuMap } from "react-icons/lu";
+import { FaRegBookmark } from "react-icons/fa";
+import { FiSettings } from "react-icons/fi";
+import { IoMdRefresh } from "react-icons/io";
 
 const App: React.FC = () => {
   const [aircraftData, setAircraftData] = useState<Aircraft[]>([]);
-  const [selectedAircraft, setSelectedAircraft] = useState<Aircraft | null>(null);
+  const [selectedAircraft, setSelectedAircraft] = useState<Aircraft | null>(
+    null
+  );
   const [historyData, setHistoryData] = useState<AircraftHistory[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
@@ -70,91 +78,119 @@ const App: React.FC = () => {
 
   return (
     <div className={styles.app}>
+      {/* 사이드 네비 */}
       <aside className={styles.sidebar}>
-        <h1 className={styles.logo}>REASKY</h1>
+        <div>
+          <h1 className={styles.logo}>
+            <CgAirplane />
+          </h1>
 
-        <nav className={styles.nav}>
-          <button>DASHBOARD</button>
-          <button>MAP</button>
-          <button>SAVE</button>
-          <button>SETTING</button>
-        </nav>
+          <nav className={styles.nav}>
+            <button>
+              <RiGlobalLine className={styles.icon} />
+            </button>
+            <button>
+              <LuMap className={styles.icon} />
+            </button>
+            <button>
+              <FaRegBookmark className={styles.icon} />
+            </button>
+            <button>
+              <FiSettings className={styles.icon} />
+            </button>
+          </nav>
+        </div>
 
         <footer className={styles.sidebarFooter}>
-          <small>© 2025 REASKY Dashboard</small>
+          <small>©</small>
         </footer>
       </aside>
 
       <main className={styles.main}>
+        {/* 헤더 */}
         <header className={styles.header}>
-          <h2>실시간 항공기 추적 대시보드</h2>
+          <h2>Aircraft Tracking Dashboard</h2>
           <button onClick={handleRefresh} disabled={refreshing}>
-            🔄 {refreshing ? "새로고침 중..." : "새로고침"}
+            <IoMdRefresh className={styles.refresh} />
           </button>
         </header>
 
-        <section className={styles.stats}>
-          <article className={styles.statCard}>
-            <p>추적 중인 항공기</p>
-            <strong>{aircraftData.length}대</strong>
-          </article>
-          <article className={styles.statCard}>
-            <p>평균 고도</p>
-            <strong>
-              {metersToFeet(calculateAverageAltitude(aircraftData)).toLocaleString()} ft
-            </strong>
-          </article>
-          <article className={styles.statCard}>
-            <p>평균 속도</p>
-            <strong>{msToKnots(calculateAverageSpeed(aircraftData))} knots</strong>
-          </article>
-          <article className={styles.statCard}>
-            <p>상태</p>
-            <strong className={styles.live}>● LIVE</strong>
-          </article>
-        </section>
+        {/* 지도 차트 영역 */}
+        <div className={styles.sectionWrap}>
+          {/* 상단 */}
+          <div className={styles.sectionTop}>
 
-        {aircraftData.length === 0 ? (
-          <div className={styles.alertWarning}>
-            현재 한국 상공(위도 30–45°, 경도 120–135°)에 추적 가능한 항공기가 없습니다.
-            잠시 후 다시 시도해주세요.
-          </div>
-        ) : (
-          <>
-            <section className={styles.mapSection}>
-              <GoogleMap
-                aircraftData={aircraftData}
-                onAircraftSelect={handleAircraftSelect}
-                selectedAircraft={selectedAircraft}
-              />
-            </section>
-
-            {historyData.length > 0 ? (
-              <section className={styles.charts}>
-                <div className={styles.chartBox}>
-                  <AltitudeChart data={historyData} />
-                </div>
-                <div className={styles.chartBox}>
-                  <VelocityChart data={historyData} />
-                </div>
-                <div className={styles.chartBox}>
-                  <HeadingChart data={historyData} />
-                </div>
-              </section>
-            ) : (
-              <div className={styles.alertInfo}>
-                💡 지도에서 항공기 마커를 클릭하여 해당 항공기의 비행 데이터를 확인하세요.
+            {/* 지도 영역 */}
+            {aircraftData.length === 0 ? (
+              <div className={styles.alertWarning}>
+                현재 한국 상공(위도 30–45°, 경도 120–135°)에 추적 가능한
+                항공기가 없습니다. 잠시 후 다시 시도해주세요.
               </div>
+            ) : (
+              <>
+                <section className={styles.mapSection}>
+                  <GoogleMap
+                    aircraftData={aircraftData}
+                    onAircraftSelect={handleAircraftSelect}
+                    selectedAircraft={selectedAircraft}
+                  />
+                </section>
+              </>
             )}
-          </>
-        )}
 
-        <footer className={styles.footer}>
-          <p>
-            데이터 제공: OpenSky Network | 30초마다 자동 갱신 | 한국 상공 (위도 30–45°, 경도
-            120–135°)
-          </p>
-        </footer>
+            {/* 정보 영역 */}
+            <section className={styles.stats}>
+              <article className={styles.statCard}>
+                <p>추적 중인 항공기</p>
+                <strong>{aircraftData.length}대</strong>
+              </article>
+              <article className={styles.statCard}>
+                <p>평균 고도</p>
+                <strong>
+                  {metersToFeet(
+                    calculateAverageAltitude(aircraftData)
+                  ).toLocaleString()}{" "}
+                  ft
+                </strong>
+              </article>
+              <article className={styles.statCard}>
+                <p>평균 속도</p>
+                <strong>
+                  {msToKnots(calculateAverageSpeed(aircraftData))} knots
+                </strong>
+              </article>
+              <article className={styles.statCard}>
+                <p>상태</p>
+                <strong className={styles.live}>● LIVE</strong>
+              </article>
+            </section>
+          </div>
+
+          {/* 하단 차트 */}
+          {historyData.length > 0 ? (
+            <section className={styles.charts}>
+              <div className={styles.chartBox}>
+                <AltitudeChart data={historyData} />
+              </div>
+              <div className={styles.chartBox}>
+                <VelocityChart data={historyData} />
+              </div>
+              <div className={styles.chartBox}>
+                <HeadingChart data={historyData} />
+              </div>
+            </section>
+          ) : (
+            <div className={styles.alertInfo}>
+              💡 지도에서 항공기 마커를 클릭하여 해당 항공기의 비행 데이터를 확인하세요.
+            </div>
+          )}
+
+          <footer className={styles.footer}>
+            <p>
+              데이터 제공: OpenSky Network | 1분마다 자동 갱신 | 한국 상공(위도 30–45°, 경도 120–135°)
+            </p>
+          </footer>
+        </div>
       </main>
     </div>
   );
