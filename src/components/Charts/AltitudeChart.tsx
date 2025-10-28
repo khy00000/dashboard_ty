@@ -36,7 +36,6 @@ const AltitudeChart: React.FC<ChartProps> = ({ data }) => {
           <YAxis
             stroke="#fff"
             label={{ value: "고도m", angle: -90, position: "insideLeft" }}
-            stroke="#fff"
             domain={[0, 360]}
             tick={{ fontSize: 12 }}
           />

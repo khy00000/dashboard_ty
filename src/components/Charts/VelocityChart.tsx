@@ -39,7 +39,6 @@ const VelocityChart: React.FC<ChartProps> = ({ data }) => {
           <YAxis
             stroke="#fff"
             label={{ value: "속도m/s", angle: -90, position: "insideLeft" }}
-            stroke="#fff"
             domain={[0, 360]}
             tick={{ fontSize: 12 }}
           />

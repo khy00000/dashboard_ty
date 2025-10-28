@@ -1,9 +1,11 @@
 import axios from "axios";
 import type { Aircraft, AircraftHistory } from "../types/aircraft.types";
 
-const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === "true";
+const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === "false";
 
 const OPENSKY_API = "https://opensky-network.org/api/states/all";
+const USERNAME = import.meta.env.VITE_OPENSKY_USERNAME;
+const PASSWORD = import.meta.env.VITE_OPENSKY_PASSWORD;
 
 // 마지막 API 호출 시간 추적 (rate limiting)
 let lastCallTime = 0;
@@ -37,6 +39,10 @@ export async function fetchAircraftData(): Promise<Aircraft[]> {
 
     const response = await axios.get(OPENSKY_API, {
       timeout: 10000, // 10초 타임아웃
+      auth: {
+        username: USERNAME,
+        password: PASSWORD,
+      },
     });
 
     const states = response.data.states;
