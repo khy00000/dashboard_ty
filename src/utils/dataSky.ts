@@ -1,15 +1,17 @@
 import axios from "axios";
 import type { Aircraft, AircraftHistory } from "../types/aircraft.types";
 
+// 개발모드 목데이터 사용
 const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === "false";
 
-const OPENSKY_API = "https://opensky-network.org/api/states/all";
-const USERNAME = import.meta.env.VITE_OPENSKY_USERNAME;
-const PASSWORD = import.meta.env.VITE_OPENSKY_PASSWORD;
+// 항공 데이터 엔드포인트
+const OPENSKY_API = "/opensky/api/states/all";
 
-// 마지막 API 호출 시간 추적 (rate limiting)
+// 마지막 API 호출 시간 추적
 let lastCallTime = 0;
+// 마지막 가져온 항공기 데이터 배열
 let cachedAircraftData: Aircraft[] = [];
+// 호출 최소 간격
 const MIN_INTERVAL = 30000; // 30초
 
 // 실시간 항공기 데이터 가져오기 (한국 상공)
@@ -20,7 +22,7 @@ export async function fetchAircraftData(): Promise<Aircraft[]> {
       return generateMockAircraft();
     }
 
-    // Rate Limiting 체크
+    // Rate Limiting(속도 제한) 체크 ?? 어떻게 수정
     const now = Date.now();
     const timeSinceLastCall = now - lastCallTime;
 
@@ -37,12 +39,9 @@ export async function fetchAircraftData(): Promise<Aircraft[]> {
     console.log("OpenSky Network API 호출...");
     lastCallTime = now;
 
+    // 데이터 요청
     const response = await axios.get(OPENSKY_API, {
       timeout: 10000, // 10초 타임아웃
-      auth: {
-        username: USERNAME,
-        password: PASSWORD,
-      },
     });
 
     const states = response.data.states;
@@ -71,7 +70,8 @@ export async function fetchAircraftData(): Promise<Aircraft[]> {
 
     console.log(`한국 상공: ${koreanAirspace.length}대`);
 
-    // Aircraft 형식으로 변환
+    // ? 슬라이스 인덱스 기준
+    // Aircraft 형식으로 변환 (30대만 처리)
     const aircraft: Aircraft[] = koreanAirspace
       .slice(0, 30)
       .map((state: any) => {
@@ -84,14 +84,16 @@ export async function fetchAircraftData(): Promise<Aircraft[]> {
           altitude: state[7] || 0,
           velocity: state[9] || 0,
           heading: state[10] || 0,
+          // ?
           onGround: state[8] || false,
+          // ?
           lastUpdate: new Date(state[4] * 1000).toISOString(),
         };
       });
 
     console.log(`${aircraft.length}대의 항공기 데이터 처리 완료`);
 
-    // 캐시 업데이트
+    // 캐시 데이터 업데이트
     cachedAircraftData = aircraft;
     return aircraft;
   } catch (error) {
