@@ -50,8 +50,8 @@ const App: React.FC = () => {
   };
 
   useEffect(() => {
-    loadData();
-    const interval = setInterval(() => loadData(true), 60000);
+    loadData(); // 초기 실행
+    const interval = setInterval(() => loadData(true), 60000); // 10초마다 자동 갱신 나중에 수정
     return () => clearInterval(interval);
   }, []);
 
@@ -180,7 +180,7 @@ const App: React.FC = () => {
 
               <footer className={styles.footer}>
                 <p>
-                  데이터 제공: OpenSky Network | 30초마다 자동 갱신 | 한국
+                  데이터 제공: OpenSky Network | 10초마다 자동 갱신 | 한국
                   상공(위도 30–45°, 경도 120–135°)
                 </p>
               </footer>
