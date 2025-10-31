@@ -1,18 +1,19 @@
 import axios from "axios";
-import type { Aircraft, AircraftHistory } from "../types/aircraft.types";
+import type { Aircraft, AircraftTrack } from "../types/aircraft.types";
 
 // 개발모드 목데이터 사용
-const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === "false";
+const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === "true";
 
 // 항공 데이터 엔드포인트
 const OPENSKY_API = "/opensky/api/states/all";
+const OPENSKY_TRACK_API = "/opensky/api/tracks/all";
 
 // 실시간 항공기 데이터 가져오기 (한국 상공)
 export async function fetchAircraftData(): Promise<Aircraft[]> {
   try {
     if (USE_MOCK_DATA) {
       console.log("개발모드: mock 항공기 데이터 사용 중");
-      return generateMockAircraft();
+      return mockAircraft();
     }
 
     // 데이터 요청 (한국 상공만)
@@ -32,22 +33,22 @@ export async function fetchAircraftData(): Promise<Aircraft[]> {
 
     // Aircraft 형식으로 변환
     const aircraft: Aircraft[] = states
-    .filter((state: any) => !state[8]) // 지상에 있는 항공기 제외
-    .slice(0, 30) //30대만 처리
-    .map((state: any) => {
-      return {
-        id: state[0], // icao24
-        callsign: state[1]?.trim() || `Aircraft-${state[0].substring(0, 6)}`,
-        country: state[2],
-        latitude: state[6],
-        longitude: state[5],
-        altitude: state[7] || 0,
-        velocity: state[9] || 0,
-        heading: state[10] || 0,
-        onGround: state[8] || false,
-        lastUpdate: new Date(state[4] * 1000).toISOString(),
-      };
-    });
+      .filter((state: any) => !state[8]) // 지상에 있는 항공기 제외
+      .slice(0, 30) //30대만 처리
+      .map((state: any) => {
+        return {
+          id: state[0], // icao24
+          callsign: state[1]?.trim() || `Aircraft-${state[0].substring(0, 6)}`,
+          country: state[2],
+          latitude: state[6],
+          longitude: state[5],
+          altitude: state[7] || 0,
+          velocity: state[9] || 0,
+          heading: state[10] || 0,
+          onGround: state[8] || false,
+          lastUpdate: new Date(state[4] * 1000).toISOString(),
+        };
+      });
 
     console.log(`${aircraft.length}대의 항공기 데이터 처리 완료`);
 
@@ -62,68 +63,113 @@ export async function fetchAircraftData(): Promise<Aircraft[]> {
   }
 }
 
-// 개발 중 API 호출 대신 mock 데이터 사용
-function generateMockAircraft(): Aircraft[] {
-  const mockData: Aircraft[] = [];
-  const baseTime = Date.now();
+// 개발 중 API 호출 대신 mock 데이터 사용 (now 항공기 정보)
+async function mockAircraft(): Promise<Aircraft[]> {
+  const response = await fetch("/mockStates.json");
+  const data = await response.json();
 
-  // 한국 상공 5개 항공기 시뮬레이션
-  for (let i = 0; i < 5; i++) {
-    const baseLat = 35 + Math.random() * 3;
-    const baseLon = 126 + Math.random() * 4;
+  const states = data.states;
 
-    mockData.push({
-      id: `mock${i}${Math.random().toString(36).substr(2, 5)}`,
-      callsign: `KAL${100 + i * 10}`,
-      country: "South Korea",
-      latitude: baseLat + (Math.random() - 0.5) * 0.5,
-      longitude: baseLon + (Math.random() - 0.5) * 0.5,
-      altitude: 9000 + Math.random() * 4000,
-      velocity: 200 + Math.random() * 100,
-      heading: Math.random() * 360,
-      onGround: false,
-      lastUpdate: new Date(baseTime).toISOString(),
-    });
-  }
+  if (!states || states.length === 0) return [];
 
-  console.log("Mock 데이터 반환 (개발 모드)");
-  return mockData;
+  const aircraft: Aircraft[] = states.map((state: any) => {
+    return {
+      id: state[0], // icao24
+      callsign: state[1]?.trim() || `Aircraft-${state[0].substring(0, 6)}`,
+      country: state[2],
+      latitude: state[6],
+      longitude: state[5],
+      altitude: state[7] || 0,
+      velocity: state[9] || 0,
+      heading: state[10] || 0,
+      onGround: state[8] || false,
+      lastUpdate: new Date(state[4] * 1000).toISOString(),
+    };
+  });
+  console.log(`MOCK 개발모드 : ${aircraft.length}대의 항공기 데이터 처리 완료`);
+
+  return aircraft;
 }
 
-// 가상 고도, 속도, 방향 데이터 생성 (차트용 mock)
-export function generateAircraftHistory(aircraft: Aircraft): AircraftHistory[] {
-  const history: AircraftHistory[] = [];
-  const currentTime = Date.now();
+// 항공기 트랙(이전) 데이터
+export async function fetchTrackData(
+  icao24: string,
+  time: number
+): Promise<AircraftTrack[]> {
+  try {
+    if (USE_MOCK_DATA) {
+      console.log("개발모드: mock 항공기의 이전(트랙) 데이터 사용 중");
+      return mockTrack(icao24);
+    }
 
-  // 지난 2시간 데이터 생성 (12개 포인트, 10분 간격)
-  for (let i = 12; i >= 0; i--) {
-    const timeOffset = i * 10 * 60 * 1000; // 10분
-    const timestamp = new Date(currentTime - timeOffset);
-
-    // 현재 값에서 자연스럽게 변화
-    const altitudeVariation = (Math.random() - 0.5) * 1000;
-    const velocityVariation = (Math.random() - 0.5) * 50;
-    const headingVariation = (Math.random() - 0.5) * 20;
-
-    history.push({
-      time: timestamp.toLocaleTimeString("ko-KR", {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-      altitude: Math.max(
-        0,
-        aircraft.altitude + (altitudeVariation * (12 - i)) / 12
-      ),
-      velocity: Math.max(
-        0,
-        aircraft.velocity + (velocityVariation * (12 - i)) / 12
-      ),
-      heading:
-        (aircraft.heading + (headingVariation * (12 - i)) / 12 + 360) % 360,
+    const response = await axios.get(`${OPENSKY_TRACK_API}`, {
+      params: { icao24, time },
+      timeout: 10000,
     });
-  }
 
-  return history;
+    const data = response.data;
+
+    if (!data || !data.path) {
+      console.warn("트랙 데이터가 없습니다.");
+      return [];
+    }
+
+    const track: AircraftTrack[] = data.path.map((p: any) => ({
+      time: p[0],
+      latitude: p[2],
+      longitude: p[1],
+      altitude: p[3] || 0,
+      velocity: p[4] || 0,
+      heading: p[5] || 0,
+    }));
+
+    console.log(`항공기 트랙 데이터 처리 완료: ${icao24}, ${track.length}`);
+
+    return track;
+  } catch (error) {
+    console.error("OpenSky Track API 오류:", error);
+    if (axios.isAxiosError(error)) {
+      console.error("상세:", error.message);
+    }
+    return [];
+  }
+}
+
+// 항공기 히스토리 & 차트 정보 mock 데이터
+async function mockTrack(icao24: string): Promise<AircraftTrack[]> {
+  const response = await fetch("/mockTracks.json");
+  const data = await response.json();
+
+  const history = data.find((t: any) => t.icao24 === icao24);
+  if (!history) return [];
+
+  const track: AircraftTrack[] = history.path.map((p: any) => ({
+    time: p.time,
+    latitude: p.latitude,
+    longitude: p.longitude,
+    altitude: p.altitude,
+    velocity: p.velocity,
+    heading: p.heading,
+  }));
+  console.log(
+    `MOCK 개발모드 : ${icao24}항공기의 이전(트랙) 데이터 처리 완료`
+  );
+
+  return track;
+}
+
+// 평균 고도 계산
+export function averageAltitude(aircraft: Aircraft[]): number {
+  if (aircraft.length === 0) return 0;
+  const total = aircraft.reduce((sum, a) => sum + a.altitude, 0);
+  return Math.round(total / aircraft.length);
+}
+
+// 평균 속도 계산
+export function averageSpeed(aircraft: Aircraft[]): number {
+  if (aircraft.length === 0) return 0;
+  const total = aircraft.reduce((sum, a) => sum + a.velocity, 0);
+  return Math.round(total / aircraft.length);
 }
 
 // 고도를 피트로 변환
@@ -134,18 +180,4 @@ export function metersToFeet(meters: number): number {
 // 속도를 노트로 변환
 export function msToKnots(ms: number): number {
   return Math.round(ms * 1.94384);
-}
-
-// 평균 고도 계산
-export function calculateAverageAltitude(aircraft: Aircraft[]): number {
-  if (aircraft.length === 0) return 0;
-  const total = aircraft.reduce((sum, a) => sum + a.altitude, 0);
-  return Math.round(total / aircraft.length);
-}
-
-// 평균 속도 계산
-export function calculateAverageSpeed(aircraft: Aircraft[]): number {
-  if (aircraft.length === 0) return 0;
-  const total = aircraft.reduce((sum, a) => sum + a.velocity, 0);
-  return Math.round(total / aircraft.length);
 }

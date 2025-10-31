@@ -33,9 +33,12 @@ export interface Aircraft {
   lastUpdate: string;
 }
 
-// 항공기 이력 데이터
-export interface AircraftHistory {
+// 항공기 히스토리 & 차트 정보 데이터
+export interface AircraftTrack {
+  icao24: string;
   time: string;
+  latitude: number;
+  longitude: number;
   altitude: number;
   velocity: number;
   heading: number;

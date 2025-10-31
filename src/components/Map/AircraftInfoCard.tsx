@@ -1,6 +1,6 @@
 import React from "react";
 import type { AircraftInfoCardProps } from "../../types/aircraft.types";
-import { metersToFeet, msToKnots } from "../../utils/dataSky";
+// import { metersToFeet, msToKnots } from "../../utils/dataSky";
 import styles from "./GoogleMap.module.scss";
 import { AiOutlineClose } from "react-icons/ai";
 
@@ -21,11 +21,14 @@ const AircraftInfoCard: React.FC<AircraftInfoCardProps> = ({
         </p>
         <p>
           <strong>고도 :</strong>{" "}
-          {metersToFeet(aircraft.altitude).toLocaleString()} ft (
+          {/* {metersToFeet(aircraft.altitude).toLocaleString()} ft  */}
+          (
           {Math.round(aircraft.altitude).toLocaleString()} m)
         </p>
         <p>
-          <strong>속도 :</strong> {msToKnots(aircraft.velocity)} knots (
+          <strong>속도 :</strong> 
+          {/* {msToKnots(aircraft.velocity)} knots  */}
+          (
           {Math.round(aircraft.velocity * 3.6)} km/h)
         </p>
         <p>

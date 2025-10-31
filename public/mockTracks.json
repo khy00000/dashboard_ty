@@ -1,0 +1,114 @@
+[
+  {
+    "icao24": "abc001",
+    "callsign": "KAL101",
+    "startTime": 1761798000,
+    "endTime": 1761799800,
+    "path": [
+      {
+        "time": 1761798000,
+        "latitude": 37.558,
+        "longitude": 126.791,
+        "altitude": 0,
+        "velocity": 0,
+        "heading": 180
+      },
+      {
+        "time": 1761798400,
+        "latitude": 36.8,
+        "longitude": 126.9,
+        "altitude": 5000,
+        "velocity": 200,
+        "heading": 190
+      },
+      {
+        "time": 1761798800,
+        "latitude": 36.3,
+        "longitude": 127.0,
+        "altitude": 9000,
+        "velocity": 230,
+        "heading": 195
+      },
+      {
+        "time": 1761799200,
+        "latitude": 35.8,
+        "longitude": 127.1,
+        "altitude": 11000,
+        "velocity": 250,
+        "heading": 200
+      },
+      {
+        "time": 1761799500,
+        "latitude": 34.5,
+        "longitude": 126.9,
+        "altitude": 4000,
+        "velocity": 180,
+        "heading": 205
+      },
+      {
+        "time": 1761799800,
+        "latitude": 33.511,
+        "longitude": 126.492,
+        "altitude": 0,
+        "velocity": 0,
+        "heading": 210
+      }
+    ]
+  },
+  {
+    "icao24": "abc002",
+    "callsign": "AAR202",
+    "startTime": 1761798100,
+    "endTime": 1761800000,
+    "path": [
+      {
+        "time": 1761798100,
+        "latitude": 35.214,
+        "longitude": 129.100,
+        "altitude": 0,
+        "velocity": 0,
+        "heading": 340
+      },
+      {
+        "time": 1761798500,
+        "latitude": 35.7,
+        "longitude": 128.7,
+        "altitude": 4000,
+        "velocity": 180,
+        "heading": 350
+      },
+      {
+        "time": 1761798800,
+        "latitude": 36.4,
+        "longitude": 127.9,
+        "altitude": 8000,
+        "velocity": 220,
+        "heading": 355
+      },
+      {
+        "time": 1761799100,
+        "latitude": 36.8,
+        "longitude": 127.5,
+        "altitude": 10000,
+        "velocity": 250,
+        "heading": 0
+      },
+      {
+        "time": 1761799400,
+        "latitude": 37.3,
+        "longitude": 127.1,
+        "altitude": 6000,
+        "velocity": 200,
+        "heading": 10
+      },
+      {
+        "time": 1761800000,
+        "latitude": 37.558,
+        "longitude": 126.791,
+        "altitude": 0,
+        "velocity": 0,
+        "heading": 0
+      }
+    ]
+  }
+]
