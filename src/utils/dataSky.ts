@@ -158,26 +158,26 @@ async function mockTrack(icao24: string): Promise<AircraftTrack[]> {
   return track;
 }
 
-// 평균 고도 계산
+// 항공기 전체 평균 고도 계산
 export function averageAltitude(aircraft: Aircraft[]): number {
   if (aircraft.length === 0) return 0;
   const total = aircraft.reduce((sum, a) => sum + a.altitude, 0);
   return Math.round(total / aircraft.length);
 }
 
-// 평균 속도 계산
+// 항공기 전체 평균 속도 계산
 export function averageSpeed(aircraft: Aircraft[]): number {
   if (aircraft.length === 0) return 0;
   const total = aircraft.reduce((sum, a) => sum + a.velocity, 0);
   return Math.round(total / aircraft.length);
 }
 
-// 고도를 피트로 변환
+// 선택된 항공기(track) 고도를 피트로 변환
 export function metersToFeet(meters: number): number {
   return Math.round(meters * 3.28084);
 }
 
-// 속도를 노트로 변환
+// 선택된 항공기(track) 속도를 노트로 변환
 export function msToKnots(ms: number): number {
   return Math.round(ms * 1.94384);
 }

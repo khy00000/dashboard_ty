@@ -47,6 +47,7 @@ export interface AircraftTrack {
 // 구글맵 Props
 export interface GoogleMapProps {
   aircraftData: Aircraft[];
+  trackData: AircraftTrack[];
   onAircraftSelect: (aircraft: Aircraft) => void;
   selectedAircraft: Aircraft | null;
 }
@@ -59,5 +60,5 @@ export interface AircraftInfoCardProps {
 
 // 차트 Props
 export interface ChartProps {
-  data: AircraftHistory[];
+  data: AircraftTrack[];
 }

@@ -19,7 +19,6 @@ import { FiSettings } from "react-icons/fi";
 import { IoMdRefresh } from "react-icons/io";
 
 const App: React.FC = () => {
-  // 항공기 데이터
   const [aircraftData, setAircraftData] = useState<Aircraft[]>([]);
   const [trackData, setTrackData] = useState<AircraftTrack[]>([]);
   const [selectedAircraft, setSelectedAircraft] = useState<Aircraft | null>(
@@ -136,8 +135,9 @@ const App: React.FC = () => {
             {/* 지도 영역 */}
             <section className={styles.mapSection}>
               <GoogleMap
-                aircraftData={aircraftData}
                 onAircraftSelect={handleAircraftSelect}
+                aircraftData={aircraftData}
+                trackData={trackData}
                 selectedAircraft={selectedAircraft}
               />
             </section>

@@ -11,43 +11,49 @@ setOptions({ key: GOOGLE_MAPS_KEY });
 
 const GoogleMap: React.FC<GoogleMapProps> = ({
   aircraftData,
+  trackData,
   onAircraftSelect,
   selectedAircraft,
 }) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
+
+  // 마커 목록 저장
   const markersRef = useRef<
     Map<string, google.maps.marker.AdvancedMarkerElement>
   >(new Map());
-  // 클릭된 마커 추적
+
+  // 선택된 마커 저장 (색 변경 및 복구)
   const selectedMarkerRef =
     useRef<google.maps.marker.AdvancedMarkerElement | null>(null);
+
+  // 실시간 비행 경로 저장 (좌표 누적)
+  const aircraftHistoryRef = useRef<Map<string, google.maps.LatLngLiteral[]>>(
+    new Map()
+  );
+
+  // 폴리라인 객체 저장
+  const trailLineRef = useRef<google.maps.Polyline | null>(null);
 
   // 지도 초기화
   useEffect(() => {
     async function init() {
       const { Map } = await importLibrary("maps");
       if (mapRef.current) {
-        const mapInstance = new Map(mapRef.current, {
-          center: { lat: 37.5, lng: 127.5 },
-          zoom: 7,
-          mapId: GOOGLE_MAPS_ID,
-          disableDefaultUI: false,
-          zoomControl: true,
-          mapTypeControl: false,
-          scaleControl: false,
-          streetViewControl: false,
-          rotateControl: false,
-          fullscreenControl: false,
-        });
-        setMap(mapInstance);
+        setMap(
+          new Map(mapRef.current, {
+            center: { lat: 37.5, lng: 127.5 },
+            zoom: 7,
+            mapId: GOOGLE_MAPS_ID,
+            zoomControl: true,
+          })
+        );
       }
     }
-
-    init().catch(console.error);
+    init();
   }, []);
 
-  // 마커 렌더링
+  // 마커 생성 및 업데이트
   useEffect(() => {
     if (!map) return;
 
@@ -57,6 +63,7 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
       aircraftData.forEach((ac) => {
         let marker = markersRef.current.get(ac.id);
         if (!marker) {
+          // 신규 마커 생성
           const planeIcon = document.createElement("div");
           planeIcon.innerHTML = `
             <svg width="32" height="32" viewBox="0 0 24 24" style="transform: rotate(${ac.heading}deg)">
@@ -73,6 +80,7 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
             content: planeIcon,
           });
 
+          // 마커 선택 클릭 이벤트
           marker.addListener("click", () => {
             // 기존 마커 색 복원
             if (selectedMarkerRef.current) {
@@ -81,12 +89,12 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
               if (prevSvg) prevSvg.setAttribute("fill", "#2196F3");
             }
 
-            // 클릭 마커 색 진하게
+            // 마커 선택 색 진하게
             const svg = planeIcon.querySelector("path");
             if (svg) svg.setAttribute("fill", "#0D47A1");
             selectedMarkerRef.current = marker;
 
-            // 상세정보 오픈
+            // app.tsx 상태 업데이트 상세정보 오픈
             onAircraftSelect(ac);
 
             // 지도 중심 & 줌
@@ -98,14 +106,12 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
         } else {
           // 기존 마커 위치 업데이트
           marker.position = { lat: ac.latitude, lng: ac.longitude };
-          const svg = marker.content.querySelector("svg");
-          if (svg) svg.style.transform = `rotate(${ac.heading}deg)`;
         }
       });
     }
 
-    renderMarkers().catch(console.error);
-  }, [map, aircraftData, onAircraftSelect]);
+    renderMarkers();
+  }, [map, aircraftData, selectedAircraft, onAircraftSelect]);
 
   // 상세 정보 카드 닫기
   const handleCloseInfo = () => {
@@ -116,89 +122,6 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
       map.panTo({ lat: 37.5, lng: 127.5 }); // 초기 중심으로 이동
     }
   };
-
-  // 선택된 항공기 따라가기 (실시간)
-  useEffect(() => {
-    if (!map || !selectedAircraft) return;
-
-    let animationFrame: number;
-    const followAircraft = () => {
-      const history = aircraftHistoryRef.current.get(selectedAircraft.id);
-      if (history && history.length) {
-        const latest = history[history.length - 1];
-        map.panTo(latest);
-        // 폴리라인 갱신
-        if (trailLineRef.current) trailLineRef.current.setPath(history);
-      }
-      animationFrame = requestAnimationFrame(followAircraft);
-    };
-
-    followAircraft();
-    return () => cancelAnimationFrame(animationFrame);
-  }, [map, selectedAircraft]);
-
-  // 항공기 트랙 업데이트
-  useEffect(() => {
-    const HOURS = 8 * 60 * 60 * 1000;
-
-    aircraftData.forEach((aircraft) => {
-      const history = aircraftHistoryRef.current.get(aircraft.id) || [];
-      const newPosition = {
-        lat: aircraft.latitude,
-        lng: aircraft.longitude,
-        timestamp: Date.now(),
-      };
-
-      // 중복 제거
-      const lastPosition = history[history.length - 1];
-      const isDuplicate =
-        lastPosition &&
-        Math.abs(lastPosition.lat - newPosition.lat) < 0.0001 &&
-        Math.abs(lastPosition.lng - newPosition.lng) < 0.0001;
-
-      if (!isDuplicate) {
-        const updatedHistory = [...history, newPosition].filter(
-          (pos) => Date.now() - pos.timestamp < HOURS
-        ); // 8시간 이내
-
-        aircraftHistoryRef.current.set(aircraft.id, updatedHistory);
-      }
-    });
-  }, [aircraftData]);
-
-  // 폴리 라인
-  useEffect(() => {
-    if (!map) return;
-
-    // 이전 폴리라인 제거
-    if (trailLineRef.current) {
-      trailLineRef.current.setMap(null);
-      trailLineRef.current = null;
-    }
-
-    if (!selectedAircraft) return;
-
-    const history = aircraftHistoryRef.current.get(selectedAircraft.id) || [];
-
-    console.log(
-      "Drawing polyline for:",
-      selectedAircraft.callsign,
-      "Points:",
-      history.length
-    ); // 디버깅용
-
-    if (history.length > 1) {
-      trailLineRef.current = new google.maps.Polyline({
-        path: history,
-        geodesic: true,
-        strokeColor: "#0022ffff",
-        strokeOpacity: 0.8,
-        strokeWeight: 4,
-        map,
-        zIndex: 1, // 마커보다 아래
-      });
-    }
-  }, [selectedAircraft, map]);
 
   return (
     <section className={styles.mapContainer}>
