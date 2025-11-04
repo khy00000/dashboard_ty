@@ -64,31 +64,37 @@ export async function fetchAircraftData(): Promise<Aircraft[]> {
 }
 
 // 개발 중 API 호출 대신 mock 데이터 사용 (now 항공기 정보)
+let mockCache: Aircraft[] | null = null;
 async function mockAircraft(): Promise<Aircraft[]> {
-  const response = await fetch("/mockStates.json");
-  const data = await response.json();
+  if (!mockCache) {
+    const response = await fetch("/mockStates.json");
+    const data = await response.json();
+    mockCache = data.states.map((s: any) => ({
+      id: s[0],
+      callsign: s[1]?.trim() || `Aircraft-${s[0].substring(0, 6)}`,
+      country: s[2],
+      latitude: s[6],
+      longitude: s[5],
+      altitude: s[7] || 0,
+      velocity: s[9] || 0,
+      heading: s[10] || 0,
+      onGround: s[8] || false,
+      lastUpdate: new Date().toISOString(),
+    }));
+  }
 
-  const states = data.states;
-
-  if (!states || states.length === 0) return [];
-
-  const aircraft: Aircraft[] = states.map((state: any) => {
+  // 위치를 살짝 이동시키기 (머물지 않도록)
+  mockCache = mockCache.map((ac) => {
+    const randomOffset = () => (Math.random() - 0.5) * 0.02; // 0.02도 ≈ 2km
     return {
-      id: state[0], // icao24
-      callsign: state[1]?.trim() || `Aircraft-${state[0].substring(0, 6)}`,
-      country: state[2],
-      latitude: state[6],
-      longitude: state[5],
-      altitude: state[7] || 0,
-      velocity: state[9] || 0,
-      heading: state[10] || 0,
-      onGround: state[8] || false,
-      lastUpdate: new Date(state[4] * 1000).toISOString(),
+      ...ac,
+      latitude: ac.latitude + randomOffset(),
+      longitude: ac.longitude + randomOffset(),
+      lastUpdate: new Date().toISOString(),
     };
   });
-  console.log(`MOCK 개발모드 : ${aircraft.length}대의 항공기 데이터 처리 완료`);
 
-  return aircraft;
+  return mockCache;
 }
 
 // 항공기 트랙(이전) 데이터
@@ -151,9 +157,7 @@ async function mockTrack(icao24: string): Promise<AircraftTrack[]> {
     velocity: p.velocity,
     heading: p.heading,
   }));
-  console.log(
-    `MOCK 개발모드 : ${icao24}항공기의 이전(트랙) 데이터 처리 완료`
-  );
+  console.log(`MOCK 개발모드 : ${icao24}항공기의 이전(트랙) 데이터 처리 완료`);
 
   return track;
 }

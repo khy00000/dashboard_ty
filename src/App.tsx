@@ -54,7 +54,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     loadAircraftData(); // 초기 실행
-    const interval = setInterval(() => loadAircraftData(true), 60000); // 60초마다 자동 갱신 나중에 수정
+    const interval = setInterval(() => loadAircraftData(true), 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -181,7 +181,7 @@ const App: React.FC = () => {
 
           <footer className={styles.footer}>
             <p>
-              데이터 제공: OpenSky Network | 10초마다 자동 갱신 | 한국 상공(위도
+              데이터 제공: OpenSky Network | 30초마다 자동 갱신 | 한국 상공(위도
               30–45°, 경도 120–135°)
             </p>
           </footer>

@@ -113,13 +113,101 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
     renderMarkers();
   }, [map, aircraftData, selectedAircraft, onAircraftSelect]);
 
+  // 폴리 라인 (과거 + 현재 트랙 표시)
+  useEffect(() => {
+    if (!map || !selectedAircraft) return;
+
+    async function drawPolyline() {
+      // 기존 폴리라인 제거
+      if (trailLineRef.current) {
+        trailLineRef.current.setMap(null);
+      }
+
+      const { Polyline } = await importLibrary("maps");
+
+      // 트랙 데이터 + 실시간 데이터 결합
+      const trackPath = trackData.map((t) => ({
+        lat: t.latitude,
+        lng: t.longitude,
+      }));
+      const realtime =
+        aircraftHistoryRef.current.get(selectedAircraft.id) || [];
+      const fullPath = [...trackPath, ...realtime];
+
+      if (fullPath.length > 1) {
+        trailLineRef.current = new Polyline({
+          path: fullPath,
+          geodesic: true,
+          strokeColor: "#0D47A1",
+          strokeOpacity: 0.8,
+          strokeWeight: 4,
+          map,
+        });
+      }
+    }
+
+    drawPolyline();
+  }, [map, selectedAircraft, trackData]);
+
+  // 폴리라인 업데이트
+  useEffect(() => {
+    if (!selectedAircraft) return;
+
+    const interval = setInterval(() => {
+      const id = selectedAircraft.id;
+      const newPos = {
+        lat: selectedAircraft.latitude,
+        lng: selectedAircraft.longitude,
+      };
+
+      const history = aircraftHistoryRef.current.get(id) || [];
+
+      // 이전 값과 좌표가 동일하면 추가하지 않음
+      const lastPos = history[history.length - 1];
+      const isSame =
+        lastPos &&
+        Math.abs(lastPos.lat - newPos.lat) < 0.00001 &&
+        Math.abs(lastPos.lng - newPos.lng) < 0.00001;
+
+      if (!isSame) {
+        aircraftHistoryRef.current.set(id, [...history, newPos]);
+      }
+
+      // Polyline 업데이트
+      if (trailLineRef.current) {
+        const trackPath = trackData.map((t) => ({
+          lat: t.latitude,
+          lng: t.longitude,
+        }));
+        const mergedPath = [
+          ...trackPath,
+          ...aircraftHistoryRef.current.get(id)!,
+        ];
+        trailLineRef.current.setPath(mergedPath);
+      }
+    }, 30000); // 30초마다
+
+    return () => clearInterval(interval);
+  }, [selectedAircraft, trackData]);
+
   // 상세 정보 카드 닫기
   const handleCloseInfo = () => {
-    onAircraftSelect(null as any);
+    if (selectedMarkerRef.current) {
+      const path = selectedMarkerRef.current.content.querySelector("path");
+      if (path) path.setAttribute("fill", "#2196F3");
+    }
+    selectedMarkerRef.current = null;
 
+    // 폴리라인 제거
+    if (trailLineRef.current) {
+      trailLineRef.current.setMap(null);
+      trailLineRef.current = null;
+    }
+
+    // 지도 초기화
     if (map) {
-      map.setZoom(7); // 초기 줌으로 복귀
-      map.panTo({ lat: 37.5, lng: 127.5 }); // 초기 중심으로 이동
+      map.panTo({ lat: 37.5, lng: 127.5 });
+      map.setZoom(7);
     }
   };
 
