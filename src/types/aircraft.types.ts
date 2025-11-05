@@ -35,7 +35,6 @@ export interface Aircraft {
 
 // 항공기 히스토리 & 차트 정보 데이터
 export interface AircraftTrack {
-  icao24: string;
   time: string;
   latitude: number;
   longitude: number;

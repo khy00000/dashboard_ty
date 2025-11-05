@@ -65,6 +65,8 @@ export async function fetchAircraftData(): Promise<Aircraft[]> {
 
 // 개발 중 API 호출 대신 mock 데이터 사용 (now 항공기 정보)
 let mockCache: Aircraft[] | null = null;
+let mockUpdateCount = 0;
+
 async function mockAircraft(): Promise<Aircraft[]> {
   if (!mockCache) {
     const response = await fetch("/mockStates.json");
@@ -83,17 +85,41 @@ async function mockAircraft(): Promise<Aircraft[]> {
     }));
   }
 
-  // 위치를 살짝 이동시키기 (머물지 않도록)
+  mockUpdateCount++;
+
+  // 항공기 움직임 시뮬레이션 위치를 살짝 이동시키기 (머물지 않도록)
   mockCache = mockCache.map((ac) => {
-    const randomOffset = () => (Math.random() - 0.5) * 0.02; // 0.02도 ≈ 2km
+    // 해딩을 라디안으로 변환
+    const headingRad = (ac.heading * Math.PI) / 180;
+
+    // 속도에 비례한 이동거리 (30초 간격)
+    // 속도 m/s 30초 동안 이동한 거리를 위도/경도로 변환
+    const distanceKm = (ac.velocity * 30) / 1000; //km
+    const latChange = (distanceKm / 111) * Math.cos(headingRad); // 1도(111km)
+    const lngChange =
+      (distanceKm / (111 * Math.cos((ac.latitude * Math.PI) / 180))) *
+      Math.sin(headingRad);
+
+    // 랜덤성 추가
+    const randomFactor = 0.8 + Math.random() * 0.4; // 0.8 ~ 1.2
+
     return {
       ...ac,
-      latitude: ac.latitude + randomOffset(),
-      longitude: ac.longitude + randomOffset(),
+      latitude: ac.latitude + latChange * randomFactor,
+      longitude: ac.longitude + lngChange * randomFactor,
+      // 고도도 약간씩 변화
+      altitude: ac.altitude + (Math.random() - 0.5) * 50,
+      // 속도도 약간씩 변화
+      velocity: Math.max(180, ac.velocity + (Math.random() - 0.5) * 10),
+      // heading도 약간씩 변화
+      heading: (ac.heading + (Math.random() - 0.5) * 5 + 360) % 360,
       lastUpdate: new Date().toISOString(),
     };
   });
 
+  console.log(
+    `track MOCK 업데이트 ${mockUpdateCount} : ${mockCache.length}대 항공기 현재 위치 갱신`
+  );
   return mockCache;
 }
 
@@ -150,13 +176,14 @@ async function mockTrack(icao24: string): Promise<AircraftTrack[]> {
   if (!history) return [];
 
   const track: AircraftTrack[] = history.path.map((p: any) => ({
-    time: p.time,
-    latitude: p.latitude,
-    longitude: p.longitude,
-    altitude: p.altitude,
-    velocity: p.velocity,
-    heading: p.heading,
+    time: p[0],
+    latitude: p[2],
+    longitude: p[1],
+    altitude: p[3] || 0,
+    velocity: p[4] || 0,
+    heading: p[5] || 0,
   }));
+
   console.log(`MOCK 개발모드 : ${icao24}항공기의 이전(트랙) 데이터 처리 완료`);
 
   return track;
