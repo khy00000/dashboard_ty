@@ -2,7 +2,7 @@ import axios from "axios";
 import type { Aircraft, AircraftTrack } from "../types/aircraft.types";
 
 // 개발모드 목데이터 사용
-const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === "true";
+const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === "false";
 
 // 항공 데이터 엔드포인트
 const OPENSKY_API = "/opensky/api/states/all";
