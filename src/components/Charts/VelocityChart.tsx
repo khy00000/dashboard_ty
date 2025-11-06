@@ -10,15 +10,37 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import type { ChartProps } from "../../types/aircraft.types";
+import { msToKnots } from "../../utils/dataSky";
 import styles from "./Charts.module.scss";
 
 const VelocityChart: React.FC<ChartProps> = ({ data }) => {
+  // time을 "HH:mm" 시간 형식으로 변환
+  const chartData = data.map((d) => ({
+    ...d,
+    altitude: msToKnots(d.velocity), // knots로 변환
+    timeFormatted: new Date(d.time * 1000).toLocaleTimeString("ko-KR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+  }));
+
   // 평균 속도
   const avgVelocity = (
-    data.reduce((sum, d) => sum + d.velocity, 0) / data.length
+    data.reduce((sum, d) => sum + msToKnots(d.velocity), 0) / data.length
   ).toFixed(1);
+
   // 최고 속도
-  const maxVelocity = Math.max(...data.map((d) => d.velocity)).toFixed(1);
+  const maxVelocity = Math.max(
+    ...data.map((d) => msToKnots(d.velocity))
+  ).toFixed(1);
+
+  // y축 domain 동적 설정
+  const minAlt = Math.min(...chartData.map((d) => d.velocity));
+  const maxAlt = Math.max(...chartData.map((d) => d.velocity));
+  const yDomain = [
+    Math.floor((minAlt * 0.9) / 100) * 100,
+    Math.ceil((maxAlt * 1.1) / 100) * 100,
+  ];
 
   return (
     <div className={styles.chartContainer}>
@@ -26,21 +48,26 @@ const VelocityChart: React.FC<ChartProps> = ({ data }) => {
 
       <ResponsiveContainer width="95%" height="90%">
         <LineChart
-          data={data}
+          data={chartData}
           margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
         >
           {/* 격자 배경 */}
           <CartesianGrid strokeDasharray="3 3" stroke="#fff" />
 
           {/* x축 시간 */}
-          <XAxis dataKey="time" stroke="#fff" tick={{ fontSize: 12 }} />
+          <XAxis
+            dataKey="timeFormatted"
+            stroke="#fff"
+            tick={{ fontSize: 12 }}
+            interval="preserveStartEnd"
+          />
 
           {/* y축 속도 */}
           <YAxis
             stroke="#fff"
-            label={{ value: "속도m/s", angle: -90, position: "insideLeft" }}
-            domain={[0, 360]}
-            tick={{ fontSize: 12 }}
+            label={{ value: "속도 knots", angle: -90, position: "insideLeft", dy: 5 }}
+            domain={yDomain}
+            tick={{ fontSize: 11 }}
           />
 
           {/* 호버 */}
@@ -64,9 +91,7 @@ const VelocityChart: React.FC<ChartProps> = ({ data }) => {
                       minHeight: "40px",
                     }}
                   >
-                    <span style={{ fontSize: 14 }}>
-                      {value.toFixed(1)} m/s
-                    </span>
+                    <span style={{ fontSize: 14 }}>{value.toFixed(0)} knots</span>
                   </div>
                 );
               }
@@ -87,9 +112,10 @@ const VelocityChart: React.FC<ChartProps> = ({ data }) => {
 
       <div className={`${styles.chartsStats}`}>
         <p>
-          <strong>평균:</strong> {avgVelocity}m/s (
-          {Math.round(parseFloat(avgVelocity) * 3.6)}km/h)
-          <strong style={{ marginLeft: 12 }}>최고:</strong> {maxVelocity}m/s
+          <strong>평균:</strong>{" "}
+          {parseInt(avgVelocity).toLocaleString()} knots
+          <strong style={{ marginLeft: 12 }}>최고:</strong>{" "}
+           {parseInt(maxVelocity).toLocaleString()} knots
         </p>
       </div>
     </div>

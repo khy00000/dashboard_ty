@@ -30,7 +30,9 @@ const AltitudeChart: React.FC<ChartProps> = ({ data }) => {
   ).toFixed(0);
 
   // 최고 고도
-  const maxAltitude = Math.max(...data.map((d) => metersToFeet(d.altitude))).toFixed(0);
+  const maxAltitude = Math.max(
+    ...data.map((d) => metersToFeet(d.altitude))
+  ).toFixed(0);
 
   // y축 domain 동적 설정
   const minAlt = Math.min(...chartData.map((d) => d.altitude));
@@ -45,7 +47,10 @@ const AltitudeChart: React.FC<ChartProps> = ({ data }) => {
       <h2 className={styles.title}>고도 변화 Altitude</h2>
 
       <ResponsiveContainer width="95%" height="90%">
-        <LineChart data={chartData}>
+        <LineChart
+          data={chartData}
+          margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
+        >
           {/* 격자 배경 */}
           <CartesianGrid strokeDasharray="3 3" stroke="#fff" />
 
@@ -62,7 +67,7 @@ const AltitudeChart: React.FC<ChartProps> = ({ data }) => {
             stroke="#fff"
             label={{ value: "고도 ft", angle: -90, position: "insideLeft" }}
             domain={yDomain}
-            tick={{ fontSize: 12 }}
+            tick={{ fontSize: 11 }}
           />
 
           {/* 호버 */}

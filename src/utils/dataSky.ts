@@ -192,14 +192,14 @@ async function mockTrack(icao24: string): Promise<AircraftTrack[]> {
 // 항공기 현재 전체 평균 고도 계산 (meter -> ft 변환)
 export function averageAltitude(aircraft: Aircraft[]): number {
   if (aircraft.length === 0) return 0;
-  const total = aircraft.reduce((sum, a) => sum + (a.altitude * 3.28084), 0);
+  const total = aircraft.reduce((sum, a) => sum + a.altitude * 3.28084, 0);
   return Math.round(total / aircraft.length);
 }
 
 // 항공기 현재 전체 평균 속도 계산 (m/s -> knots 변환)
 export function averageSpeed(aircraft: Aircraft[]): number {
   if (aircraft.length === 0) return 0;
-  const total = aircraft.reduce((sum, a) => sum + (a.velocity * 1.94384), 0);
+  const total = aircraft.reduce((sum, a) => sum + a.velocity * 1.94384, 0);
   return Math.round(total / aircraft.length);
 }
 
@@ -211,4 +211,11 @@ export function metersToFeet(meters: number): number {
 // 선택된 항공기(track) 속도를 노트로 변환
 export function msToKnots(ms: number): number {
   return Math.round(ms * 1.94384);
+}
+
+// 동서남북
+export function getDirection(heading: number): string {
+  const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+  const index = Math.round(heading / 45) % 8;
+  return directions[index];
 }

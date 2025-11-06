@@ -1,6 +1,6 @@
 import React from "react";
 import type { AircraftInfoCardProps } from "../../types/aircraft.types";
-import { metersToFeet, msToKnots } from "../../utils/dataSky";
+import { metersToFeet, msToKnots, getDirection } from "../../utils/dataSky";
 import styles from "./GoogleMap.module.scss";
 import { AiOutlineClose } from "react-icons/ai";
 
@@ -17,26 +17,27 @@ const AircraftInfoCard: React.FC<AircraftInfoCardProps> = ({
 
       <div className={styles.airInfoBody}>
         <p>
-          <strong>ICAO24 :</strong> {aircraft.id.toUpperCase()}
+          <strong>ICAO24 :</strong>{" "}{aircraft.id.toUpperCase()}
         </p>
         <p>
           <strong>고도 :</strong>{" "}
-          {metersToFeet(aircraft.altitude).toLocaleString()} ft
-          (
+          {metersToFeet(aircraft.altitude).toLocaleString()} ft (
           {Math.round(aircraft.altitude).toLocaleString()} m)
         </p>
         <p>
           <strong>속도 :</strong>{" "}
-          {msToKnots(aircraft.velocity)} knots 
-          (
+          {msToKnots(aircraft.velocity)} knots (
           {Math.round(aircraft.velocity)} km/h)
         </p>
         <p>
           <strong>방향 :</strong>{" "}
           {Math.round(aircraft.heading)}°
+          ({getDirection(aircraft.heading)})
         </p>
         <p>
-          <strong>좌표 :</strong> {aircraft.latitude.toFixed(2)}°N,{" "}
+          <strong>좌표 :</strong>{" "}
+          {aircraft.latitude.toFixed(2)}°N,
+          {" "}
           {aircraft.longitude.toFixed(2)}°E
         </p>
         <p className={styles.airInfoTime}>

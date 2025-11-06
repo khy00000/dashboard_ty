@@ -10,38 +10,54 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import type { ChartProps } from "../../types/aircraft.types";
+import { getDirection  } from "../../utils/dataSky";
 import styles from "./Charts.module.scss";
 
 const HeadingChart: React.FC<ChartProps> = ({ data }) => {
+  // time을 "HH:mm" 시간 형식으로 변환
+  const chartData = data.map((d) => ({
+    ...d,
+    heading: d.heading,
+    timeFormatted: new Date(d.time * 1000).toLocaleTimeString("ko-KR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+  }));
+
   // 평균 방향
   const avgHeading = (
     data.reduce((sum, d) => sum + d.heading, 0) / data.length
   ).toFixed(0);
 
-  const getDirection = (heading: number) => {
-    const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
-    const index = Math.round(heading / 45) % 8;
-    return directions[index];
-  };
+  // y축 domain 동적 설정
+  const minAlt = Math.min(...chartData.map((d) => d.heading));
+  const maxAlt = Math.max(...chartData.map((d) => d.heading));
+  const yDomain = [
+    Math.floor((minAlt * 0.9) / 100) * 100,
+    Math.ceil((maxAlt * 1.1) / 100) * 100,
+  ];
 
   return (
     <div className={styles.chartContainer}>
       <h2 className={styles.title}>비행 방향 Heading</h2>
 
       <ResponsiveContainer width="95%" height="90%">
-        <LineChart data={data}>
+        <LineChart
+          data={chartData}
+          margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
+        >
           {/* 격자 배경 */}
           <CartesianGrid strokeDasharray="3 3" stroke="#fff" />
 
           {/* x축 시간 */}
-          <XAxis dataKey="time" stroke="#fff" tick={{ fontSize: 12 }} />
+          <XAxis dataKey="timeFormatted" stroke="#fff" tick={{ fontSize: 12 }} interval="preserveStartEnd" />
 
           {/* y축 방향 */}
           <YAxis
-            label={{ value: "방향(°)", angle: -90, position: "insideLeft" }}
+            label={{ value: "방향 °", angle: -90, position: "insideLeft" }}
             stroke="#fff"
-            domain={[0, 360]}
-            tick={{ fontSize: 12 }}
+            domain={yDomain}
+            tick={{ fontSize: 11 }}
           />
 
           {/* 호버 */}
@@ -80,7 +96,6 @@ const HeadingChart: React.FC<ChartProps> = ({ data }) => {
             dataKey="heading"
             stroke="#93c6dfff"
             strokeWidth={1}
-            name="방향 (°)"
             dot={{ r: 3, fill: "#93c6dfff" }}
             activeDot={{ r: 5 }}
           />
@@ -89,7 +104,7 @@ const HeadingChart: React.FC<ChartProps> = ({ data }) => {
 
       <div className={styles.chartsStats}>
         <p>
-          <strong>평균:</strong>방향 {avgHeading}° (
+          <strong>평균:</strong>{" "} {avgHeading}° (
           {getDirection(parseFloat(avgHeading))})
         </p>
       </div>
