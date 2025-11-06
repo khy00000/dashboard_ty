@@ -2,7 +2,7 @@ import axios from "axios";
 import type { Aircraft, AircraftTrack } from "../types/aircraft.types";
 
 // 개발모드 목데이터 사용
-const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === "false";
+const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === "true";
 
 // 항공 데이터 엔드포인트
 const OPENSKY_API = "/opensky/api/states/all";
@@ -189,17 +189,17 @@ async function mockTrack(icao24: string): Promise<AircraftTrack[]> {
   return track;
 }
 
-// 항공기 전체 평균 고도 계산
+// 항공기 현재 전체 평균 고도 계산 (meter -> ft 변환)
 export function averageAltitude(aircraft: Aircraft[]): number {
   if (aircraft.length === 0) return 0;
-  const total = aircraft.reduce((sum, a) => sum + a.altitude, 0);
+  const total = aircraft.reduce((sum, a) => sum + (a.altitude * 3.28084), 0);
   return Math.round(total / aircraft.length);
 }
 
-// 항공기 전체 평균 속도 계산
+// 항공기 현재 전체 평균 속도 계산 (m/s -> knots 변환)
 export function averageSpeed(aircraft: Aircraft[]): number {
   if (aircraft.length === 0) return 0;
-  const total = aircraft.reduce((sum, a) => sum + a.velocity, 0);
+  const total = aircraft.reduce((sum, a) => sum + (a.velocity * 1.94384), 0);
   return Math.round(total / aircraft.length);
 }
 

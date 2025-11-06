@@ -26,17 +26,18 @@ const AircraftInfoCard: React.FC<AircraftInfoCardProps> = ({
           {Math.round(aircraft.altitude).toLocaleString()} m)
         </p>
         <p>
-          <strong>속도 :</strong> 
+          <strong>속도 :</strong>{" "}
           {msToKnots(aircraft.velocity)} knots 
           (
-          {Math.round(aircraft.velocity * 3.6)} km/h)
+          {Math.round(aircraft.velocity)} km/h)
         </p>
         <p>
-          <strong>방향 :</strong> {Math.round(aircraft.heading)}°
+          <strong>방향 :</strong>{" "}
+          {Math.round(aircraft.heading)}°
         </p>
         <p>
-          <strong>좌표 :</strong> {aircraft.latitude.toFixed(4)}°N,{" "}
-          {aircraft.longitude.toFixed(4)}°E
+          <strong>좌표 :</strong> {aircraft.latitude.toFixed(2)}°N,{" "}
+          {aircraft.longitude.toFixed(2)}°E
         </p>
         <p className={styles.airInfoTime}>
           마지막 업데이트 :{" "}

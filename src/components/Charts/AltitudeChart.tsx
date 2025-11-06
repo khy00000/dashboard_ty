@@ -10,33 +10,58 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import type { ChartProps } from "../../types/aircraft.types";
+import { metersToFeet } from "../../utils/dataSky";
 import styles from "./Charts.module.scss";
 
 const AltitudeChart: React.FC<ChartProps> = ({ data }) => {
+  // time을 "HH:mm" 시간 형식으로 변환
+  const chartData = data.map((d) => ({
+    ...d,
+    altitude: metersToFeet(d.altitude), // ft로 변환
+    timeFormatted: new Date(d.time * 1000).toLocaleTimeString("ko-KR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+  }));
+
   // 평균 고도
   const avgAltitude = (
-    data.reduce((sum, d) => sum + d.altitude, 0) / data.length
+    data.reduce((sum, d) => sum + metersToFeet(d.altitude), 0) / data.length
   ).toFixed(0);
+
   // 최고 고도
-  const maxAltitude = Math.max(...data.map((d) => d.altitude)).toFixed(0);
+  const maxAltitude = Math.max(...data.map((d) => metersToFeet(d.altitude))).toFixed(0);
+
+  // y축 domain 동적 설정
+  const minAlt = Math.min(...chartData.map((d) => d.altitude));
+  const maxAlt = Math.max(...chartData.map((d) => d.altitude));
+  const yDomain = [
+    Math.floor((minAlt * 0.9) / 1000) * 1000,
+    Math.ceil((maxAlt * 1.1) / 1000) * 1000,
+  ];
 
   return (
     <div className={styles.chartContainer}>
       <h2 className={styles.title}>고도 변화 Altitude</h2>
 
       <ResponsiveContainer width="95%" height="90%">
-        <LineChart data={data}>
+        <LineChart data={chartData}>
           {/* 격자 배경 */}
           <CartesianGrid strokeDasharray="3 3" stroke="#fff" />
 
           {/* x축 시간 */}
-          <XAxis dataKey="time" stroke="#fff" tick={{ fontSize: 12 }} />
+          <XAxis
+            dataKey="timeFormatted"
+            stroke="#fff"
+            tick={{ fontSize: 12 }}
+            interval="preserveStartEnd"
+          />
 
           {/* y축 고도 */}
           <YAxis
             stroke="#fff"
-            label={{ value: "고도m", angle: -90, position: "insideLeft" }}
-            domain={[0, 360]}
+            label={{ value: "고도 ft", angle: -90, position: "insideLeft" }}
+            domain={yDomain}
             tick={{ fontSize: 12 }}
           />
 
@@ -62,7 +87,7 @@ const AltitudeChart: React.FC<ChartProps> = ({ data }) => {
                     }}
                   >
                     <span style={{ fontSize: 14 }}>
-                      {Math.round(value).toLocaleString()} m
+                      {Math.round(value).toLocaleString()} ft
                     </span>
                   </div>
                 );
@@ -84,9 +109,9 @@ const AltitudeChart: React.FC<ChartProps> = ({ data }) => {
 
       <div className={styles.chartsStats}>
         <p>
-          <strong>평균:</strong> {parseInt(avgAltitude).toLocaleString()}m
+          <strong>평균:</strong> {parseInt(avgAltitude).toLocaleString()} ft
           <strong style={{ marginLeft: 12 }}>최고:</strong>{" "}
-          {parseInt(maxAltitude).toLocaleString()}m
+          {parseInt(maxAltitude).toLocaleString()} ft
         </p>
       </div>
     </div>
