@@ -49,6 +49,10 @@ export interface GoogleMapProps {
   trackData: AircraftTrack[];
   onAircraftSelect: (aircraft: Aircraft) => void;
   selectedAircraft: Aircraft | null;
+  aircraftUpdate: Map<string, google.maps.LatLngLiteral[]>;
+  setAircraftUpdate: React.Dispatch<
+    React.SetStateAction<Map<string, google.maps.LatLngLiteral[]>>
+  >;
 }
 
 // 항공기 정보 카드 Props

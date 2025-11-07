@@ -14,6 +14,8 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
   trackData,
   onAircraftSelect,
   selectedAircraft,
+  aircraftUpdate, // 실시간 누적 좌표 기록
+  setAircraftUpdate, // 실시간 폴리라인 업데이트 용
 }) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
@@ -26,11 +28,6 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
   // 선택된 마커 저장 (색 변경 및 복구)
   const selectedMarkerRef =
     useRef<google.maps.marker.AdvancedMarkerElement | null>(null);
-
-  // 실시간 비행 경로 저장 (좌표 누적)
-  const aircraftHistoryRef = useRef<Map<string, google.maps.LatLngLiteral[]>>(
-    new Map()
-  );
 
   // 폴리라인 객체 저장
   const trailLineRef = useRef<google.maps.Polyline | null>(null);
@@ -113,34 +110,33 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
     renderMarkers();
   }, [map, aircraftData, selectedAircraft, onAircraftSelect]);
 
-  // 폴리 라인 (과거 + 현재 트랙 표시)
+  // 선택된 항공기 실시간 누적 폴리라인
   useEffect(() => {
     if (!map || !selectedAircraft) return;
 
     async function drawPolyline() {
-      // 기존 폴리라인 제거
-      if (trailLineRef.current) {
-        trailLineRef.current.setMap(null);
-      }
-
       const { Polyline } = await importLibrary("maps");
 
-      // 트랙 데이터 + 실시간 데이터 결합
-      const trackPath = trackData.map((t) => ({
+      // 과거 트랙 좌표 변환
+      const pastPath = trackData.map((t) => ({
         lat: t.latitude,
         lng: t.longitude,
       }));
-      const realtime =
-        aircraftHistoryRef.current.get(selectedAircraft.id) || [];
-      const fullPath = [...trackPath, ...realtime];
 
-      if (fullPath.length > 1) {
+      // 실시간 기록 가져오기
+      const history = aircraftUpdate.get(selectedAircraft.id) || [];
+
+      const fullPath = [...pastPath, ...history];
+
+      if (trailLineRef.current) {
+        trailLineRef.current.setPath(fullPath);
+      } else {
         trailLineRef.current = new Polyline({
           path: fullPath,
-          geodesic: true,
           strokeColor: "#0D47A1",
-          strokeOpacity: 0.8,
+          strokeOpacity: 0.9,
           strokeWeight: 4,
+          geodesic: true,
           map,
         });
       }
@@ -149,46 +145,39 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
     drawPolyline();
   }, [map, selectedAircraft, trackData]);
 
-  // 폴리라인 업데이트
+  // 새로운 좌표 실시간 이어 붙이기
   useEffect(() => {
-    if (!selectedAircraft) return;
+    if (!map || !selectedAircraft || !trailLineRef.current) return;
 
-    const interval = setInterval(() => {
-      const id = selectedAircraft.id;
-      const newPos = {
-        lat: selectedAircraft.latitude,
-        lng: selectedAircraft.longitude,
-      };
+    const id = selectedAircraft.id;
+    const currentPos = {
+      lat: selectedAircraft.latitude,
+      lng: selectedAircraft.longitude,
+    };
 
-      const history = aircraftHistoryRef.current.get(id) || [];
+    // 기존 history 가져오기
+    const prev = aircraftUpdate.get(id) || [];
+    const last = prev[prev.length - 1];
 
-      // 이전 값과 좌표가 동일하면 추가하지 않음
-      const lastPos = history[history.length - 1];
-      const isSame =
-        lastPos &&
-        Math.abs(lastPos.lat - newPos.lat) < 0.00001 &&
-        Math.abs(lastPos.lng - newPos.lng) < 0.00001;
+    // 실제로 움직였을 때만 add
+    if (!last || last.lat !== currentPos.lat || last.lng !== currentPos.lng) {
+      setAircraftUpdate((prevMap) => {
+        const newMap = new Map(prevMap);
+        newMap.set(id, [...prev, currentPos]); // 현재 위치 추가
+        return newMap;
+      });
+    }
 
-      if (!isSame) {
-        aircraftHistoryRef.current.set(id, [...history, newPos]);
-      }
+    // 과거 트랙(trackData) + 실시간(history) + 현재 위치 = 최종 폴리라인
+    const mergedPath = [
+      ...trackData.map((t) => ({ lat: t.latitude, lng: t.longitude })),
+      ...(aircraftUpdate.get(id) || []),
+      currentPos,
+    ];
 
-      // Polyline 업데이트
-      if (trailLineRef.current) {
-        const trackPath = trackData.map((t) => ({
-          lat: t.latitude,
-          lng: t.longitude,
-        }));
-        const mergedPath = [
-          ...trackPath,
-          ...aircraftHistoryRef.current.get(id)!,
-        ];
-        trailLineRef.current.setPath(mergedPath);
-      }
-    }, 30000); // 30초마다
-
-    return () => clearInterval(interval);
-  }, [selectedAircraft, trackData]);
+    // 마커와 폴리라인 마지막 지점이 일치
+    trailLineRef.current.setPath(mergedPath);
+  }, [selectedAircraft, aircraftData]); // aircraftData 갱신마다 호출됨
 
   // 상세 정보 카드 닫기
   const handleCloseInfo = () => {
@@ -203,6 +192,9 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
       trailLineRef.current.setMap(null);
       trailLineRef.current = null;
     }
+
+    // app.tsx에 선택 해제 알림
+    onAircraftSelect(null as any);
 
     // 지도 초기화
     if (map) {

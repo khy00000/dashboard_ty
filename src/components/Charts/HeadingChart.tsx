@@ -10,7 +10,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import type { ChartProps } from "../../types/aircraft.types";
-import { getDirection  } from "../../utils/dataSky";
+import { getDirection } from "../../utils/dataSky";
 import styles from "./Charts.module.scss";
 
 const HeadingChart: React.FC<ChartProps> = ({ data }) => {
@@ -50,7 +50,12 @@ const HeadingChart: React.FC<ChartProps> = ({ data }) => {
           <CartesianGrid strokeDasharray="3 3" stroke="#fff" />
 
           {/* x축 시간 */}
-          <XAxis dataKey="timeFormatted" stroke="#fff" tick={{ fontSize: 12 }} interval="preserveStartEnd" />
+          <XAxis
+            dataKey="timeFormatted"
+            stroke="#fff"
+            tick={{ fontSize: 12 }}
+            interval="preserveStartEnd"
+          />
 
           {/* y축 방향 */}
           <YAxis
@@ -104,7 +109,7 @@ const HeadingChart: React.FC<ChartProps> = ({ data }) => {
 
       <div className={styles.chartsStats}>
         <p>
-          <strong>평균:</strong>{" "} {avgHeading}° (
+          <strong>평균:</strong> {avgHeading}° (
           {getDirection(parseFloat(avgHeading))})
         </p>
       </div>

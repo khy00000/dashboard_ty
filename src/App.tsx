@@ -24,12 +24,17 @@ const App: React.FC = () => {
   const [selectedAircraft, setSelectedAircraft] = useState<Aircraft | null>(
     null
   );
+  // 실시간 경로 저장
+  const [aircraftUpdate, setAircraftUpdate] = useState<
+    Map<string, google.maps.LatLngLiteral[]>
+  >(new Map());
   const [avgAltitude, setAvgAltitude] = useState<number>(0);
   const [avgSpeed, setAvgSpeed] = useState<number>(0);
 
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
 
+  // 항공기 데이터 로딩
   const loadAircraftData = async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
     else setLoading(true);
@@ -60,12 +65,27 @@ const App: React.FC = () => {
 
   // 항공기 선택
   const handleAircraftSelect = async (aircraft: Aircraft) => {
+    // null 체크
+    if (!aircraft) {
+      setSelectedAircraft(null);
+      setTrackData([]);
+      setAircraftUpdate(new Map());
+      return;
+    }
+
+    // 새로운 항공기 선택
     setSelectedAircraft(aircraft);
 
     try {
       const now = Math.floor(Date.now() / 1000);
       const track = await fetchTrackData(aircraft.id, now);
       setTrackData(track);
+
+      setAircraftUpdate((prev) => {
+        const newMap = new Map(prev);
+        newMap.set(aircraft.id, []);
+        return newMap;
+      });
     } catch (error) {
       console.error("트랙 데이터 로드 실패:", error);
       setTrackData([]);
@@ -135,10 +155,12 @@ const App: React.FC = () => {
             {/* 지도 영역 */}
             <section className={styles.mapSection}>
               <GoogleMap
-                onAircraftSelect={handleAircraftSelect}
                 aircraftData={aircraftData}
                 trackData={trackData}
                 selectedAircraft={selectedAircraft}
+                onAircraftSelect={handleAircraftSelect}
+                aircraftUpdate={aircraftUpdate}
+                setAircraftUpdate={setAircraftUpdate}
               />
             </section>
 
