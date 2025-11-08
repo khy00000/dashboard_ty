@@ -24,10 +24,6 @@ const App: React.FC = () => {
   const [selectedAircraft, setSelectedAircraft] = useState<Aircraft | null>(
     null
   );
-  // 실시간 경로 저장
-  const [aircraftUpdate, setAircraftUpdate] = useState<
-    Map<string, google.maps.LatLngLiteral[]>
-  >(new Map());
   const [avgAltitude, setAvgAltitude] = useState<number>(0);
   const [avgSpeed, setAvgSpeed] = useState<number>(0);
 
@@ -45,16 +41,6 @@ const App: React.FC = () => {
       setAircraftData(data);
       setAvgAltitude(averageAltitude(data));
       setAvgSpeed(averageSpeed(data));
-
-      // 선택된 항공기가 있으면 업데이트된 위치로 갱신
-      if (selectedAircraft) {
-        const updatedAircraft = data.find(
-          (ac) => ac.id === selectedAircraft.id
-        );
-        if (updatedAircraft) {
-          setSelectedAircraft(updatedAircraft);
-        }
-      }
 
       if (data.length === 0) {
         console.log("항공기 데이터가 없음");
@@ -79,7 +65,6 @@ const App: React.FC = () => {
     if (!aircraft) {
       setSelectedAircraft(null);
       setTrackData([]);
-      setAircraftUpdate(new Map());
       return;
     }
 
@@ -100,11 +85,6 @@ const App: React.FC = () => {
       
       setTrackData(enrichedTrack);
 
-      setAircraftUpdate((prev) => {
-        const newMap = new Map(prev);
-        newMap.set(aircraft.id, []);
-        return newMap;
-      });
     } catch (error) {
       console.error("트랙 데이터 로드 실패:", error);
       setTrackData([]);
@@ -116,7 +96,6 @@ const App: React.FC = () => {
     loadAircraftData(true);
     setSelectedAircraft(null);
     setTrackData([]);
-    setAircraftUpdate(new Map());
   };
 
   // 로딩 화면
@@ -179,8 +158,6 @@ const App: React.FC = () => {
                 trackData={trackData}
                 selectedAircraft={selectedAircraft}
                 onAircraftSelect={handleAircraftSelect}
-                aircraftUpdate={aircraftUpdate}
-                setAircraftUpdate={setAircraftUpdate}
               />
             </section>
 

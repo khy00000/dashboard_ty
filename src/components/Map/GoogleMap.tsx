@@ -14,8 +14,6 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
   trackData,
   onAircraftSelect,
   selectedAircraft,
-  aircraftUpdate, // 실시간 누적 좌표 기록
-  setAircraftUpdate, // 실시간 폴리라인 업데이트 용
 }) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
@@ -109,97 +107,6 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
 
     renderMarkers();
   }, [map, aircraftData, selectedAircraft, onAircraftSelect]);
-
-  // 선택된 항공기 실시간 누적 폴리라인
-  useEffect(() => {
-    if (!map || !selectedAircraft) return;
-
-    async function drawPolyline() {
-      const { Polyline } = await importLibrary("maps");
-
-      // 과거 트랙 좌표 변환
-      const past = trackData.map((t) => ({
-        lat: t.latitude,
-        lng: t.longitude,
-      }));
-
-      // 현재 좌표
-      const curr = {
-        lat: selectedAircraft.latitude,
-        lng: selectedAircraft.longitude,
-      };
-
-      // 마지막 경로를 무조건 현재 좌표로
-      if (past.length > 0) {
-        past[past.length - 1] = curr;
-      } else {
-        past.push(curr);
-      }
-
-      // 실시간 기록 가져오기
-      const history = aircraftUpdate.get(selectedAircraft.id) || [];
-
-      const full = [...past, ...history];
-
-      if (trailLineRef.current) {
-        trailLineRef.current.setPath(full);
-      } else {
-        trailLineRef.current = new Polyline({
-          path: full,
-          strokeColor: "#2196F3",
-          strokeOpacity: 0.7,
-          strokeWeight: 4,
-          geodesic: true,
-          map,
-        });
-      }
-    }
-
-    drawPolyline();
-  }, [map, selectedAircraft, trackData, aircraftUpdate]);
-
-  // 새로운 좌표 실시간 폴리라인
-  useEffect(() => {
-    if (!map || !selectedAircraft || !trailLineRef.current) return;
-
-    // 선택된 항공기의 최신 좌표를 aircraftData에서 찾기
-    const updatedAircraft = aircraftData.find(
-      (ac) => ac.id === selectedAircraft.id
-    );
-    if (!updatedAircraft) return;
-    // 현재 항공기 위치
-    const currentPos = {
-      lat: selectedAircraft.latitude,
-      lng: selectedAircraft.longitude,
-    };
-
-    // 기존 기록
-    const prevHistory = aircraftUpdate.get(updatedAircraft.id) || [];
-    const lastPos = prevHistory[prevHistory.length - 1];
-
-    // 실제로 움직였을 때만 add
-    if (
-      !lastPos ||
-      lastPos.lat !== currentPos.lat ||
-      lastPos.lng !== currentPos.lng
-    ) {
-      setAircraftUpdate((prev) => {
-        const newMap = new Map(prev);
-        newMap.set(updatedAircraft.id, [...prevHistory, currentPos]); // 현재 위치 추가
-        return newMap;
-      });
-    }
-
-    // 과거 트랙 + 선택 로드 시점 + 현재 : 최종 폴리라인
-    const mergedPath = [
-      ...trackData.map((t) => ({ lat: t.latitude, lng: t.longitude })),
-      ...prevHistory,
-      currentPos,
-    ];
-
-    // 새로운 폴리라인 갱신
-    trailLineRef.current.setPath(mergedPath);
-  }, [aircraftData]);
 
   // 상세 정보 카드 닫기
   const handleCloseInfo = () => {
