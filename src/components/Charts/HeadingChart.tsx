@@ -101,7 +101,8 @@ const HeadingChart: React.FC<ChartProps> = ({ data }) => {
             dataKey="heading"
             stroke="#93c6dfff"
             strokeWidth={1}
-            dot={{ r: 3, fill: "#93c6dfff" }}
+            dot={false}
+            // dot={{ r: 3, fill: "#93c6dfff" }}
             activeDot={{ r: 5 }}
           />
         </LineChart>

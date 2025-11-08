@@ -46,6 +46,16 @@ const App: React.FC = () => {
       setAvgAltitude(averageAltitude(data));
       setAvgSpeed(averageSpeed(data));
 
+      // 선택된 항공기가 있으면 업데이트된 위치로 갱신
+      if (selectedAircraft) {
+        const updatedAircraft = data.find(
+          (ac) => ac.id === selectedAircraft.id
+        );
+        if (updatedAircraft) {
+          setSelectedAircraft(updatedAircraft);
+        }
+      }
+
       if (data.length === 0) {
         console.log("항공기 데이터가 없음");
       }
@@ -79,7 +89,16 @@ const App: React.FC = () => {
     try {
       const now = Math.floor(Date.now() / 1000);
       const track = await fetchTrackData(aircraft.id, now);
-      setTrackData(track);
+
+      // track heading이 null/false인 경우 현재 항공기의 heading으로 대체
+      const enrichedTrack = track.map(t => ({
+        ...t,
+        heading: (t.heading === null || t.heading === false) 
+          ? aircraft.heading 
+          : t.heading
+      }));
+      
+      setTrackData(enrichedTrack);
 
       setAircraftUpdate((prev) => {
         const newMap = new Map(prev);
@@ -97,6 +116,7 @@ const App: React.FC = () => {
     loadAircraftData(true);
     setSelectedAircraft(null);
     setTrackData([]);
+    setAircraftUpdate(new Map());
   };
 
   // 로딩 화면

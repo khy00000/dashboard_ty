@@ -106,7 +106,8 @@ const AltitudeChart: React.FC<ChartProps> = ({ data }) => {
             dataKey="altitude"
             stroke="#3B82F6"
             strokeWidth={1}
-            dot={{ r: 3, fill: "#3B82F6" }}
+            dot={false}
+            // dot={{ r: 3, fill: "#3B82F6" }}
             activeDot={{ r: 5 }}
           />
         </LineChart>

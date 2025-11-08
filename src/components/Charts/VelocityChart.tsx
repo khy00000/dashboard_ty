@@ -104,7 +104,8 @@ const VelocityChart: React.FC<ChartProps> = ({ data }) => {
             dataKey="velocity"
             stroke="#8B5CF6"
             strokeWidth={1}
-            dot={{ r: 3, fill: "#8B5CF6" }}
+            dot={false}
+            // dot={{ r: 3, fill: "#8B5CF6" }}
             activeDot={{ r: 5 }}
           />
         </LineChart>

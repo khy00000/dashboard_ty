@@ -21,7 +21,6 @@ export async function fetchAircraftData(): Promise<Aircraft[]> {
       `${OPENSKY_API}?lamin=30&lomin=120&lamax=45&lomax=135`,
       { timeout: 10000 } // 10초 타임아웃
     );
-
     const states = response.data.states;
 
     if (!states || states.length === 0) {
@@ -29,11 +28,22 @@ export async function fetchAircraftData(): Promise<Aircraft[]> {
       return [];
     }
 
-    console.log(`한국 상공 항공기 수신: ${states.length}대`);
-
     // Aircraft 형식으로 변환
     const aircraft: Aircraft[] = states
-      .filter((state: any) => !state[8]) // 지상에 있는 항공기 제외
+      .filter((state: any) => {
+        const lat = state[6];
+        const lon = state[5];
+        const isValidPos = typeof lat === "number" && typeof lon === "number";
+
+        return (
+          !state[8] && // 지상 항공기 제외
+          isValidPos && // null/undefined/0 제외
+          lat >= 30 &&
+          lat <= 45 &&
+          lon >= 120 &&
+          lon <= 135
+        );
+      })
       .slice(0, 30) //30대만 처리
       .map((state: any) => {
         return {
@@ -146,14 +156,16 @@ export async function fetchTrackData(
       return [];
     }
 
-    const track: AircraftTrack[] = data.path.map((p: any) => ({
-      time: p[0],
-      latitude: p[2],
-      longitude: p[1],
-      altitude: p[3] || 0,
-      velocity: p[4] || 0,
-      heading: p[5] || 0,
-    }));
+    const track: AircraftTrack[] = data.path
+      .filter((p: any) => p[1] !== null && p[2] !== null)
+      .map((p: any) => ({
+        time: p[0],
+        latitude: p[1],
+        longitude: p[2],
+        altitude: p[3] || 0,
+        velocity: p[4] || 0,
+        heading: p[5] || false,
+      }));
 
     console.log(`항공기 트랙 데이터 처리 완료: ${icao24}, ${track.length}`);
 
@@ -177,8 +189,8 @@ async function mockTrack(icao24: string): Promise<AircraftTrack[]> {
 
   const track: AircraftTrack[] = history.path.map((p: any) => ({
     time: p[0],
-    latitude: p[2],
     longitude: p[1],
+    latitude: p[2],
     altitude: p[3] || 0,
     velocity: p[4] || 0,
     heading: p[5] || 0,
