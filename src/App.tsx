@@ -24,11 +24,13 @@ const App: React.FC = () => {
   const [selectedAircraft, setSelectedAircraft] = useState<Aircraft | null>(
     null
   );
+
   const [avgAltitude, setAvgAltitude] = useState<number>(0);
   const [avgSpeed, setAvgSpeed] = useState<number>(0);
 
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [isMapReset, setIsMapReset] = useState(false);
 
   // 항공기 데이터 로딩
   const loadAircraftData = async (isRefresh = false) => {
@@ -41,10 +43,6 @@ const App: React.FC = () => {
       setAircraftData(data);
       setAvgAltitude(averageAltitude(data));
       setAvgSpeed(averageSpeed(data));
-
-      if (data.length === 0) {
-        console.log("항공기 데이터가 없음");
-      }
     } catch (error) {
       console.error("데이터 로드 실패:", error);
     } finally {
@@ -53,13 +51,14 @@ const App: React.FC = () => {
     }
   };
 
+  // 30초 마다 업데이트
   useEffect(() => {
     loadAircraftData(); // 초기 실행
     const interval = setInterval(() => loadAircraftData(true), 30000);
     return () => clearInterval(interval);
   }, []);
 
-  // 항공기 선택
+  // 항공기 선택 시 (track 데이터 연결)
   const handleAircraftSelect = async (aircraft: Aircraft) => {
     // null 체크
     if (!aircraft) {
@@ -67,24 +66,23 @@ const App: React.FC = () => {
       setTrackData([]);
       return;
     }
-
-    // 새로운 항공기 선택
+    // 항공기 선택
     setSelectedAircraft(aircraft);
 
     try {
       const now = Math.floor(Date.now() / 1000);
       const track = await fetchTrackData(aircraft.id, now);
 
-      // track heading이 null/false인 경우 현재 항공기의 heading으로 대체
-      const enrichedTrack = track.map(t => ({
+      // track heading이 null/false인 경우 state heading으로 대체
+      const enrichedTrack = track.map((t) => ({
         ...t,
-        heading: (t.heading === null || t.heading === false) 
-          ? aircraft.heading 
-          : t.heading
+        heading:
+          t.heading === null || t.heading === false
+            ? aircraft.heading
+            : t.heading,
       }));
-      
-      setTrackData(enrichedTrack);
 
+      setTrackData(enrichedTrack);
     } catch (error) {
       console.error("트랙 데이터 로드 실패:", error);
       setTrackData([]);
@@ -96,6 +94,9 @@ const App: React.FC = () => {
     loadAircraftData(true);
     setSelectedAircraft(null);
     setTrackData([]);
+    setIsMapReset(true);
+    // 다시 false로 돌려놓기 (다음 refresh 대비)
+    setTimeout(() => setIsMapReset(false), 100);
   };
 
   // 로딩 화면
@@ -158,6 +159,7 @@ const App: React.FC = () => {
                 trackData={trackData}
                 selectedAircraft={selectedAircraft}
                 onAircraftSelect={handleAircraftSelect}
+                isMapReset={isMapReset}
               />
             </section>
 

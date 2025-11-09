@@ -14,6 +14,7 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
   trackData,
   onAircraftSelect,
   selectedAircraft,
+  isMapReset,
 }) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
@@ -48,7 +49,7 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
     init();
   }, []);
 
-  // 마커 생성 및 업데이트
+  // 마커 생성 및 선택 업데이트
   useEffect(() => {
     if (!map) return;
 
@@ -108,13 +109,51 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
     renderMarkers();
   }, [map, aircraftData, selectedAircraft, onAircraftSelect]);
 
-  // 상세 정보 카드 닫기
-  const handleCloseInfo = () => {
+  // 항공기 선택 후 폴리라인 생성
+  useEffect(() => {
+    if (!map || !selectedAircraft) return;
+
+    async function initPolyline() {
+      const pastPath = trackData.map((t) => ({
+        lat: t.latitude,
+        lng: t.longitude,
+      }));
+
+      // 현재 위치 추가
+      const currentPos = {
+        lat: selectedAircraft.latitude,
+        lng: selectedAircraft.longitude,
+      };
+
+      const fullPath = [...pastPath, currentPos];
+
+      // 폴리라인 객체 없으면 생성
+      if (!trailLineRef.current) {
+        const { Polyline } = await importLibrary("maps");
+        trailLineRef.current = new Polyline({
+          path: fullPath,
+          strokeColor: "#2561bb",
+          strokeOpacity: 0.6,
+          strokeWeight: 4,
+          geodesic: true,
+          map,
+        });
+      } else {
+        trailLineRef.current.setPath(fullPath);
+        // 자동 업데이트
+      }
+    }
+    initPolyline();
+  }, [selectedAircraft, trackData, aircraftData]);
+
+  // 지도, 폴리라인, 마커 초기화
+  const resetMapView = () => {
+    // 선택 마커 색상 복원
     if (selectedMarkerRef.current) {
       const path = selectedMarkerRef.current.content.querySelector("path");
       if (path) path.setAttribute("fill", "#2196F3");
+      selectedMarkerRef.current = null;
     }
-    selectedMarkerRef.current = null;
 
     // 폴리라인 제거
     if (trailLineRef.current) {
@@ -122,15 +161,26 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
       trailLineRef.current = null;
     }
 
-    // app.tsx에 선택 해제 알림
-    onAircraftSelect(null as any);
-
-    // 지도 초기화
+    // 지도 위치 / 줌 초기화
     if (map) {
       map.panTo({ lat: 37.5, lng: 127.5 });
       map.setZoom(7);
     }
+
+    // App에 선택 해제 알림
+    onAircraftSelect(null as any);
   };
+
+  // 상세 정보 카드 닫기
+  const handleCloseInfo = () => {
+    resetMapView();
+  };
+
+  // 새로고침 시
+  useEffect(() => {
+    if (!isMapReset || !map) return;
+    resetMapView();
+  }, [isMapReset, map]);
 
   return (
     <section className={styles.mapContainer}>
