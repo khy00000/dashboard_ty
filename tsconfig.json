@@ -5,6 +5,9 @@
     { "path": "./tsconfig.node.json" }
   ],
   "compilerOptions": {
-    "types": ["google.maps"]
+    "types": ["google.maps", "vite/client"],
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true
   }
 }

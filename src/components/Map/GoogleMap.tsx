@@ -1,3 +1,5 @@
+/// <reference types="google.maps" />
+
 import React, { useEffect, useRef, useState } from "react";
 import { setOptions, importLibrary } from "@googlemaps/js-api-loader";
 import type { GoogleMapProps } from "../../types/aircraft.types";
@@ -142,7 +144,7 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
         console.log("폴리라인 경로 업데이트됨");
 
         if (!selectedAircraft) return;
-        
+
         // 지도 중심을 항공기로 이동
         map.panTo({
           lat: selectedAircraft.latitude,
