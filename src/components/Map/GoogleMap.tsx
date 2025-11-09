@@ -82,22 +82,23 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
           marker.addListener("click", () => {
             // 기존 마커 색 복원
             if (selectedMarkerRef.current) {
-              const prevSvg =
-                selectedMarkerRef.current.content.querySelector("path");
+              const content = selectedMarkerRef.current
+                ?.content as HTMLElement | null;
+              const prevSvg = content?.querySelector("path");
               if (prevSvg) prevSvg.setAttribute("fill", "#2196F3");
             }
 
             // 마커 선택 색 진하게
             const svg = planeIcon.querySelector("path");
             if (svg) svg.setAttribute("fill", "#0D47A1");
-            selectedMarkerRef.current = marker;
+            selectedMarkerRef.current = marker ?? null;
 
             // app.tsx 선택 알림
             onAircraftSelect(ac);
 
             // 지도 중심 & 줌
-            map.panTo({ lat: ac.latitude, lng: ac.longitude });
-            map.setZoom(9);
+            map?.panTo({ lat: ac.latitude, lng: ac.longitude });
+            map?.setZoom(9);
           });
 
           markersRef.current.set(ac.id, marker);
@@ -146,7 +147,7 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
         if (!selectedAircraft) return;
 
         // 지도 중심을 항공기로 이동
-        map.panTo({
+        map?.panTo({
           lat: selectedAircraft.latitude,
           lng: selectedAircraft.longitude,
         });
@@ -159,8 +160,9 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
   const resetMapView = () => {
     // 선택 마커 색상 복원
     if (selectedMarkerRef.current) {
-      const path = selectedMarkerRef.current.content.querySelector("path");
-      if (path) path.setAttribute("fill", "#2196F3");
+      const content = selectedMarkerRef.current?.content as HTMLElement | null;
+      const prevSvg = content?.querySelector("path");
+      if (prevSvg) prevSvg.setAttribute("fill", "#2196F3");
       selectedMarkerRef.current = null;
     }
 
