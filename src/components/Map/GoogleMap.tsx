@@ -141,6 +141,8 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
         trailLineRef.current.setPath(fullPath);
         console.log("폴리라인 경로 업데이트됨");
 
+        if (!selectedAircraft) return;
+        
         // 지도 중심을 항공기로 이동
         map.panTo({
           lat: selectedAircraft.latitude,

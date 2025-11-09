@@ -33,7 +33,7 @@ const App: React.FC = () => {
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [isMapReset, setIsMapReset] = useState(false);
 
-    useEffect(() => {
+  useEffect(() => {
     selectedAircraftRef.current = selectedAircraft;
   }, [selectedAircraft]);
 
@@ -44,10 +44,7 @@ const App: React.FC = () => {
       const track = await fetchTrackData(aircraft.id, now);
       const enrichedTrack = track.map((t) => ({
         ...t,
-        heading:
-          t.heading === null || t.heading === false
-            ? aircraft.heading
-            : (t.heading as number),
+        heading: typeof t.heading === "number" ? t.heading : aircraft.heading,
       }));
 
       // 현재 위치 추가
@@ -95,14 +92,16 @@ const App: React.FC = () => {
             altitude: updated.altitude || 0,
             velocity: updated.velocity || 0,
             heading:
-              updated.heading !== null && updated.heading !== false
+              typeof updated.heading === "number"
                 ? updated.heading
                 : currentSelected.heading,
           };
 
           setTrackData((prev) => {
             const updated = [...prev, newPoint];
-            console.log(`Track 새위치 state 데이터로 업데이트: ${updated.length}개 포인트`);
+            console.log(
+              `Track 새위치 state 데이터로 업데이트: ${updated.length}개 포인트`
+            );
             return updated;
           });
         } else {
@@ -143,10 +142,10 @@ const App: React.FC = () => {
     setSelectedAircraft(null);
     setTrackData([]);
     setIsMapReset(true);
-    
+
     // 데이터 다시 로드
     loadAircraftData(true);
-    
+
     // 지도 초기화 플래그 리셋
     setTimeout(() => setIsMapReset(false), 200);
   };

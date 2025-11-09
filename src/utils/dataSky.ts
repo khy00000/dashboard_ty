@@ -95,6 +95,8 @@ async function mockAircraft(): Promise<Aircraft[]> {
     }));
   }
 
+  if (!mockCache) return [];
+
   mockUpdateCount++;
 
   // 항공기 움직임 시뮬레이션 위치를 살짝 이동시키기 (머물지 않도록)

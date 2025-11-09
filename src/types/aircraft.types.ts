@@ -40,7 +40,7 @@ export interface AircraftTrack {
   longitude: number;
   altitude: number;
   velocity: number;
-  heading: number | false;
+  heading: number;
 }
 
 // 구글맵 Props
