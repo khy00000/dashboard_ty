@@ -8,7 +8,7 @@ const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === "true";
 const OPENSKY_API = "/opensky/api/states/all";
 const OPENSKY_TRACK_API = "/opensky/api/tracks/all";
 
-// 실시간 항공기 데이터 가져오기 (한국 상공)
+// 실시간 항공기 데이터 가져오기 (한국 일본 일부 상공)
 export async function fetchAircraftData(): Promise<Aircraft[]> {
   try {
     if (USE_MOCK_DATA) {
@@ -16,9 +16,9 @@ export async function fetchAircraftData(): Promise<Aircraft[]> {
       return mockAircraft();
     }
 
-    // 데이터 요청 (한국 상공만)
+    // 데이터 요청
     const response = await axios.get(
-      `${OPENSKY_API}?lamin=30&lomin=120&lamax=45&lomax=135`,
+      `${OPENSKY_API}?lamin=33&lomin=124&lamax=43&lomax=132`,
       { timeout: 10000 } // 10초 타임아웃
     );
     const states = response.data.states;
@@ -38,10 +38,10 @@ export async function fetchAircraftData(): Promise<Aircraft[]> {
         return (
           !state[8] && // 지상 항공기 제외
           isValidPos && // null/undefined/0 제외
-          lat >= 30 &&
-          lat <= 45 &&
-          lon >= 120 &&
-          lon <= 135
+          lat >= 33 &&
+          lat <= 43 &&
+          lon >= 124 &&
+          lon <= 132
         );
       })
       .slice(0, 30) //30대만 처리

@@ -90,7 +90,7 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
             if (svg) svg.setAttribute("fill", "#0D47A1");
             selectedMarkerRef.current = marker;
 
-            // app.tsx 상태 업데이트 상세정보 오픈
+            // app.tsx 선택 알림
             onAircraftSelect(ac);
 
             // 지도 중심 & 줌
@@ -111,23 +111,21 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
 
   // 항공기 선택 후 폴리라인 생성
   useEffect(() => {
-    if (!map || !selectedAircraft) return;
+    if (!map || !selectedAircraft || trackData.length === 0) {
+      // 선택 해제되면 폴리라인 제거
+      if (trailLineRef.current) {
+        trailLineRef.current.setMap(null);
+        trailLineRef.current = null;
+      }
+      return;
+    }
 
     async function initPolyline() {
-      const pastPath = trackData.map((t) => ({
+      const fullPath = trackData.map((t) => ({
         lat: t.latitude,
         lng: t.longitude,
       }));
 
-      // 현재 위치 추가
-      const currentPos = {
-        lat: selectedAircraft.latitude,
-        lng: selectedAircraft.longitude,
-      };
-
-      const fullPath = [...pastPath, currentPos];
-
-      // 폴리라인 객체 없으면 생성
       if (!trailLineRef.current) {
         const { Polyline } = await importLibrary("maps");
         trailLineRef.current = new Polyline({
@@ -139,12 +137,19 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
           map,
         });
       } else {
-        trailLineRef.current.setPath(fullPath);
         // 자동 업데이트
+        trailLineRef.current.setPath(fullPath);
+        console.log("폴리라인 경로 업데이트됨");
+
+        // 지도 중심을 항공기로 이동
+        map.panTo({
+          lat: selectedAircraft.latitude,
+          lng: selectedAircraft.longitude,
+        });
       }
     }
     initPolyline();
-  }, [selectedAircraft, trackData, aircraftData]);
+  }, [map, selectedAircraft, trackData]);
 
   // 지도, 폴리라인, 마커 초기화
   const resetMapView = () => {

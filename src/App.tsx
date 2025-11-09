@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import GoogleMap from "./components/Map/GoogleMap";
 import AltitudeChart from "./components/Charts/AltitudeChart";
 import VelocityChart from "./components/Charts/VelocityChart";
@@ -24,6 +24,7 @@ const App: React.FC = () => {
   const [selectedAircraft, setSelectedAircraft] = useState<Aircraft | null>(
     null
   );
+  const selectedAircraftRef = useRef<Aircraft | null>(null);
 
   const [avgAltitude, setAvgAltitude] = useState<number>(0);
   const [avgSpeed, setAvgSpeed] = useState<number>(0);
@@ -32,17 +33,84 @@ const App: React.FC = () => {
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [isMapReset, setIsMapReset] = useState(false);
 
-  // 항공기 데이터 로딩
+    useEffect(() => {
+    selectedAircraftRef.current = selectedAircraft;
+  }, [selectedAircraft]);
+
+  // Track 데이터 로딩
+  const loadTrackData = async (aircraft: Aircraft) => {
+    try {
+      const now = Math.floor(Date.now() / 1000);
+      const track = await fetchTrackData(aircraft.id, now);
+      const enrichedTrack = track.map((t) => ({
+        ...t,
+        heading:
+          t.heading === null || t.heading === false
+            ? aircraft.heading
+            : (t.heading as number),
+      }));
+
+      // 현재 위치 추가
+      const currentPoint: AircraftTrack = {
+        time: now,
+        latitude: aircraft.latitude,
+        longitude: aircraft.longitude,
+        altitude: aircraft.altitude || 0,
+        velocity: aircraft.velocity || 0,
+        heading: aircraft.heading,
+      };
+
+      setTrackData([...enrichedTrack, currentPoint]);
+    } catch (error) {
+      console.error("트랙 데이터 로드 실패:", error);
+      setTrackData([]);
+    }
+  };
+
+  // 항공기 전체 스테이트 데이터 실시간
   const loadAircraftData = async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
     else setLoading(true);
 
     try {
-      console.log("항공기 데이터 로딩...");
       const data = await fetchAircraftData();
       setAircraftData(data);
       setAvgAltitude(averageAltitude(data));
       setAvgSpeed(averageSpeed(data));
+
+      const currentSelected = selectedAircraftRef.current;
+
+      // 선택된 항공기가 있는 경우 : 위치 갱신 + track 마지막에 state 최신 정보 추가
+      if (currentSelected) {
+        const updated = data.find((ac) => ac.id === currentSelected.id);
+
+        if (updated) {
+          setSelectedAircraft(updated);
+
+          // Track에 새 위치 추가
+          const newPoint: AircraftTrack = {
+            time: Math.floor(Date.now() / 1000),
+            latitude: updated.latitude,
+            longitude: updated.longitude,
+            altitude: updated.altitude || 0,
+            velocity: updated.velocity || 0,
+            heading:
+              updated.heading !== null && updated.heading !== false
+                ? updated.heading
+                : currentSelected.heading,
+          };
+
+          setTrackData((prev) => {
+            const updated = [...prev, newPoint];
+            console.log(`Track 새위치 state 데이터로 업데이트: ${updated.length}개 포인트`);
+            return updated;
+          });
+        } else {
+          // 항공기가 범위에서 사라졌을 때 초기화
+          setSelectedAircraft(null);
+          setTrackData([]);
+        }
+      }
     } catch (error) {
       console.error("데이터 로드 실패:", error);
     } finally {
@@ -51,52 +119,36 @@ const App: React.FC = () => {
     }
   };
 
-  // 30초 마다 업데이트
+  // 30초마다 업데이트
   useEffect(() => {
-    loadAircraftData(); // 초기 실행
+    loadAircraftData();
     const interval = setInterval(() => loadAircraftData(true), 30000);
     return () => clearInterval(interval);
   }, []);
 
-  // 항공기 선택 시 (track 데이터 연결)
-  const handleAircraftSelect = async (aircraft: Aircraft) => {
-    // null 체크
+  // 항공기 선택시 (트랙 데이터 최초 로딩)
+  const handleAircraftSelect = async (aircraft: Aircraft | null) => {
     if (!aircraft) {
       setSelectedAircraft(null);
       setTrackData([]);
       return;
     }
-    // 항공기 선택
     setSelectedAircraft(aircraft);
-
-    try {
-      const now = Math.floor(Date.now() / 1000);
-      const track = await fetchTrackData(aircraft.id, now);
-
-      // track heading이 null/false인 경우 state heading으로 대체
-      const enrichedTrack = track.map((t) => ({
-        ...t,
-        heading:
-          t.heading === null || t.heading === false
-            ? aircraft.heading
-            : t.heading,
-      }));
-
-      setTrackData(enrichedTrack);
-    } catch (error) {
-      console.error("트랙 데이터 로드 실패:", error);
-      setTrackData([]);
-    }
+    await loadTrackData(aircraft);
   };
 
   // 새로고침
   const handleRefresh = () => {
-    loadAircraftData(true);
+    // 순서 중요
     setSelectedAircraft(null);
     setTrackData([]);
     setIsMapReset(true);
-    // 다시 false로 돌려놓기 (다음 refresh 대비)
-    setTimeout(() => setIsMapReset(false), 100);
+    
+    // 데이터 다시 로드
+    loadAircraftData(true);
+    
+    // 지도 초기화 플래그 리셋
+    setTimeout(() => setIsMapReset(false), 200);
   };
 
   // 로딩 화면
@@ -119,7 +171,7 @@ const App: React.FC = () => {
           </h1>
 
           <nav className={styles.nav}>
-            <button>
+            <button className={styles.active}>
               <RiGlobalLine className={styles.icon} />
             </button>
             <button>
@@ -202,8 +254,8 @@ const App: React.FC = () => {
 
           <footer className={styles.footer}>
             <p>
-              데이터 제공: OpenSky Network | 30초마다 자동 갱신 | 한국 상공(위도
-              30–45°, 경도 120–135°)
+              데이터 제공: OpenSky Network | 30초마다 자동 갱신 | KR JP(위도
+              33–43°, 경도 124–132°)
             </p>
           </footer>
         </div>

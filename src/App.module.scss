@@ -98,14 +98,14 @@ button {
       .icon {
         color: #ffffff81;
         transition: color 0.2s;
-
-        &:hover {
+        
+        &:hover .icon {
           color: #ffffff;
         }
+      }
 
-        &:active {
-          color: #ffffff;
-        }
+      &.active .icon {
+        color: #ffffff;
       }
     }
   }

@@ -35,12 +35,12 @@ export interface Aircraft {
 
 // 항공기 히스토리 & 차트 정보 데이터
 export interface AircraftTrack {
-  time: string;
+  time: number;
   latitude: number;
   longitude: number;
   altitude: number;
   velocity: number;
-  heading: number;
+  heading: number | false;
 }
 
 // 구글맵 Props
@@ -48,7 +48,7 @@ export interface GoogleMapProps {
   aircraftData: Aircraft[];
   trackData: AircraftTrack[];
   selectedAircraft: Aircraft | null;
-  onAircraftSelect: (ac: Aircraft | null) => void;
+  onAircraftSelect: (aircraft: Aircraft | null) => void | Promise<void>;
   isMapReset: boolean;
 }
 
