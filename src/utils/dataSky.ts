@@ -2,14 +2,13 @@ import axios from "axios";
 import type { Aircraft, AircraftTrack } from "../types/aircraft.types";
 
 // 개발모드 목데이터 사용
-const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === "true";
+const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === "false";
 console.log(
   `[env check] MODE: ${import.meta.env.MODE}, USE_MOCK_DATA: ${USE_MOCK_DATA}`
 );
 
-// 항공 데이터 엔드포인트
-const OPENSKY_API = "/opensky/api/states/all";
-const OPENSKY_TRACK_API = "/opensky/api/tracks/all";
+const OPENSKY_API = "https://opensky-network.org/api/states/all";
+const OPENSKY_TRACK_API = "https://opensky-network.org/api/tracks/all";
 
 // 실시간 항공기 데이터 가져오기 (한국 일본 일부 상공)
 export async function fetchAircraftData(): Promise<Aircraft[]> {
