@@ -2,7 +2,7 @@ import axios from "axios";
 import type { Aircraft, AircraftTrack } from "../types/aircraft.types";
 
 // 개발모드 목데이터 사용
-const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === "false";
+const USE_MOCK_DATA = JSON.parse(import.meta.env.VITE_USE_MOCK_DATA || "false");
 console.log(
   `[env check] MODE: ${import.meta.env.MODE}, USE_MOCK_DATA: ${USE_MOCK_DATA}`
 );
