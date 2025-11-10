@@ -99,7 +99,7 @@ async function mockAircraft(): Promise<Aircraft[]> {
 
   mockUpdateCount++;
 
-  // 항공기 움직임 시뮬레이션 위치를 살짝 이동시키기 (머물지 않도록)
+  // 항공기 움직임 시뮬레이션 위치를 살짝 이동시키기(state 데이터 처럼)
   mockCache = mockCache.map((ac) => {
     // 해딩을 라디안으로 변환
     const headingRad = (ac.heading * Math.PI) / 180;
