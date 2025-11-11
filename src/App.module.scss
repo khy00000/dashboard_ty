@@ -1,3 +1,5 @@
+@use "./mixin" as *;
+
 * {
   font-family: system-ui, "-apple-system", "sans-serif";
   margin: 0;
@@ -239,4 +241,16 @@ button {
       font-size: 14px;
     }
   }
+}
+
+@include respond-max($laptop){
+
+}
+
+@include respond-max($tablet){
+
+}
+
+@include respond-max($mobile-l){
+
 }

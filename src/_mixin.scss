@@ -1,0 +1,11 @@
+$mobile-s: 360px;
+$mobile-l: 480px;
+$tablet: 768px;
+$laptop: 1024px;
+
+// 최대값 기준 (화면 작아질수록)
+@mixin respond-max($breakpoint) {
+  @media (max-width: $breakpoint) {
+    @content;
+  }
+}
