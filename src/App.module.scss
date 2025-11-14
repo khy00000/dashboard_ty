@@ -100,7 +100,7 @@ button {
       .icon {
         color: #ffffff81;
         transition: color 0.2s;
-        
+
         &:hover .icon {
           color: #ffffff;
         }
@@ -243,14 +243,12 @@ button {
   }
 }
 
-@include respond-max($laptop){
+@include respond-max($laptop) {
 
 }
 
-@include respond-max($tablet){
-
+@include respond-max($tablet) {
 }
 
-@include respond-max($mobile-l){
-
+@include respond-max($mobile-l) {
 }

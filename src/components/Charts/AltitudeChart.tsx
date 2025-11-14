@@ -100,7 +100,8 @@ const AltitudeChart: React.FC<ChartProps> = ({ data }) => {
               return null;
             }}
           />
-          <Legend />
+          <Legend
+          />
           <Line
             type="monotone"
             dataKey="altitude"

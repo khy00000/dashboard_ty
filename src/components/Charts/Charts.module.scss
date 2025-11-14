@@ -1,3 +1,5 @@
+@use "../../mixin" as *;
+
 .chartContainer {
   width: 100%;
   height: auto;
@@ -31,4 +33,22 @@
   align-items: center;
   justify-content: center;
   font-size: 11px;
+}
+
+@include respond-max($laptop) {
+  :global(.recharts-legend-wrapper){
+    right: -30px !important;
+    left: unset !important;
+    font-size: 11px !important;
+  }
+
+  :global(.recharts-default-legend) {
+    text-align: right !important;
+  }
+  
+  // 평균 최고값
+  .chartsStats {
+    right: unset;
+    left: 11px;
+  }
 }
