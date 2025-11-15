@@ -36,19 +36,24 @@
 }
 
 @include respond-max($laptop) {
-  :global(.recharts-legend-wrapper){
-    right: -30px !important;
-    left: unset !important;
-    font-size: 11px !important;
+  .chartContainer {
+    padding: 15px !important;
   }
 
   :global(.recharts-default-legend) {
     text-align: right !important;
   }
-  
+
+  :global(.recharts-legend-wrapper) {
+    right: -25px !important;
+    left: unset !important;
+    bottom: 10px !important;
+    font-size: 11px !important;
+  }
+
   // 평균 최고값
   .chartsStats {
     right: unset;
-    left: 11px;
+    left: 15px;
   }
 }
