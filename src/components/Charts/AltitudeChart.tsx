@@ -46,7 +46,7 @@ const AltitudeChart: React.FC<ChartProps> = ({ data }) => {
     <div className={styles.chartContainer}>
       <h2 className={styles.title}>고도 변화 Altitude</h2>
 
-      <ResponsiveContainer width="95%" height="90%">
+      <ResponsiveContainer>
         <LineChart
           data={chartData}
           margin={{ top: 5, right: 5, left: 5, bottom: 5 }}

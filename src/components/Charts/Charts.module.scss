@@ -40,6 +40,10 @@
     padding: 15px !important;
   }
 
+  :global(.recharts-surface) {
+    height: 90% !important;
+  }
+
   :global(.recharts-default-legend) {
     text-align: right !important;
   }
