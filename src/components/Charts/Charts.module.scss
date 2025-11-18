@@ -22,13 +22,54 @@
     font-size: 16px;
     margin-bottom: 15px;
   }
+
+  // 그래프
+  .chart {
+    width: 100% !important;
+    height: 85% !important;
+  }
 }
 
+// 라인 텍스트
+.legendList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 10px;
+  font-size: 12px;
+}
+
+.legendDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 4px;
+}
+
+.legendAlText {
+  color: #3b82f6;
+}
+
+.legendVeText {
+  color: #8b5cf6;
+}
+
+.legendHeText {
+  color: #93c6dfff;
+}
+
+// 평균&최고
 .chartsStats {
   position: absolute;
-  bottom: 11px;
-  right: 11px;
-  margin-top: 15px;
+  bottom: 20px;
+  right: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -38,10 +79,6 @@
 @include respond-max($laptop) {
   .chartContainer {
     padding: 15px !important;
-  }
-
-  :global(.recharts-surface) {
-    height: 90% !important;
   }
 
   :global(.recharts-default-legend) {

@@ -46,7 +46,7 @@ const VelocityChart: React.FC<ChartProps> = ({ data }) => {
     <div className={styles.chartContainer}>
       <h2 className={styles.title}>속도 변화 Velocity</h2>
 
-      <ResponsiveContainer width="95%" height="90%">
+      <ResponsiveContainer className={styles.chart}>
         <LineChart
           data={chartData}
           margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
@@ -65,9 +65,15 @@ const VelocityChart: React.FC<ChartProps> = ({ data }) => {
           {/* y축 속도 */}
           <YAxis
             stroke="#fff"
-            label={{ value: "속도 knots", angle: -90, position: "insideLeft", dy: 5 }}
+            label={{
+              value: "속도 knots",
+              angle: -90,
+              position: "insideLeft",
+              dx: 0,
+              dy: 0,
+            }}
             domain={yDomain}
-            tick={{ fontSize: 11 }}
+            tick={{ fontSize: 10 }}
           />
 
           {/* 호버 */}
@@ -91,14 +97,30 @@ const VelocityChart: React.FC<ChartProps> = ({ data }) => {
                       minHeight: "40px",
                     }}
                   >
-                    <span style={{ fontSize: 14 }}>{value.toFixed(0)} knots</span>
+                    <span style={{ fontSize: 14 }}>
+                      {value.toFixed(0)} knots
+                    </span>
                   </div>
                 );
               }
               return null;
             }}
           />
-          <Legend />
+          <Legend
+            content={({ payload }) => (
+              <ul className={styles.legendList}>
+                {payload?.map((entry, index) => (
+                  <li key={`item-${index}`} className={styles.legendItem}>
+                    <span
+                      className={styles.legendDot}
+                      style={{ backgroundColor: entry.color }}
+                    />
+                    <span className={styles.legendVeText}>{entry.value}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          />
           <Line
             type="monotone"
             dataKey="velocity"
@@ -113,10 +135,9 @@ const VelocityChart: React.FC<ChartProps> = ({ data }) => {
 
       <div className={`${styles.chartsStats}`}>
         <p>
-          <strong>평균:</strong>{" "}
-          {parseInt(avgVelocity).toLocaleString()} knots
+          <strong>평균:</strong> {parseInt(avgVelocity).toLocaleString()} knots
           <strong style={{ marginLeft: 12 }}>최고:</strong>{" "}
-           {parseInt(maxVelocity).toLocaleString()} knots
+          {parseInt(maxVelocity).toLocaleString()} knots
         </p>
       </div>
     </div>

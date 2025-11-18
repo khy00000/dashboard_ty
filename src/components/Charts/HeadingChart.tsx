@@ -41,7 +41,7 @@ const HeadingChart: React.FC<ChartProps> = ({ data }) => {
     <div className={styles.chartContainer}>
       <h2 className={styles.title}>비행 방향 Heading</h2>
 
-      <ResponsiveContainer width="95%" height="90%">
+      <ResponsiveContainer className={styles.chart}>
         <LineChart
           data={chartData}
           margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
@@ -59,10 +59,16 @@ const HeadingChart: React.FC<ChartProps> = ({ data }) => {
 
           {/* y축 방향 */}
           <YAxis
-            label={{ value: "방향 °", angle: -90, position: "insideLeft" }}
+            label={{
+              value: "방향 °",
+              angle: -90,
+              position: "insideLeft",
+              dx: 0,
+              dy: -20,
+            }}
             stroke="#fff"
             domain={yDomain}
-            tick={{ fontSize: 11 }}
+            tick={{ fontSize: 10 }}
           />
 
           {/* 호버 */}
@@ -95,7 +101,21 @@ const HeadingChart: React.FC<ChartProps> = ({ data }) => {
               return null;
             }}
           />
-          <Legend />
+          <Legend
+            content={({ payload }) => (
+              <ul className={styles.legendList}>
+                {payload?.map((entry, index) => (
+                  <li key={`item-${index}`} className={styles.legendItem}>
+                    <span
+                      className={styles.legendDot}
+                      style={{ backgroundColor: entry.color }}
+                    />
+                    <span className={styles.legendHeText}>{entry.value}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          />
           <Line
             type="monotone"
             dataKey="heading"

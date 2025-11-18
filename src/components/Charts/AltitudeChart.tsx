@@ -46,7 +46,7 @@ const AltitudeChart: React.FC<ChartProps> = ({ data }) => {
     <div className={styles.chartContainer}>
       <h2 className={styles.title}>고도 변화 Altitude</h2>
 
-      <ResponsiveContainer>
+      <ResponsiveContainer className={styles.chart}>
         <LineChart
           data={chartData}
           margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
@@ -65,9 +65,15 @@ const AltitudeChart: React.FC<ChartProps> = ({ data }) => {
           {/* y축 고도 */}
           <YAxis
             stroke="#fff"
-            label={{ value: "고도 ft", angle: -90, position: "insideLeft" }}
+            label={{
+              value: "고도 ft",
+              angle: -90,
+              position: "insideLeft",
+              dx: 0,
+              dy: -20,
+            }}
             domain={yDomain}
-            tick={{ fontSize: 11 }}
+            tick={{ fontSize: 10 }}
           />
 
           {/* 호버 */}
@@ -101,6 +107,19 @@ const AltitudeChart: React.FC<ChartProps> = ({ data }) => {
             }}
           />
           <Legend
+            content={({ payload }) => (
+              <ul className={styles.legendList}>
+                {payload?.map((entry, index) => (
+                  <li key={`item-${index}`} className={styles.legendItem}>
+                    <span
+                      className={styles.legendDot}
+                      style={{ backgroundColor: entry.color }}
+                    />
+                    <span className={styles.legendAlText}>{entry.value}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
           />
           <Line
             type="monotone"
